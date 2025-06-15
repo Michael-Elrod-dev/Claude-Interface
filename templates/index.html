@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Add markdown processing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Add syntax highlighting for code blocks -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle" class="sidebar-toggle">
+        <span class="arrow">›</span>
+    </button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+        <h2>Chat History</h2>
+        <button id="newChatBtn" class="new-chat-btn" onclick="startNewConversation()">+ New Chat</button>
+        <div id="conversationsList" class="conversations-list">
+            <!-- Conversations will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div id="chatContainer" class="chat-messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <button id="attachButton" class="attach-button">📎</button>
+                <input type="file" id="fileInput" multiple accept="*/*" style="display: none;">
+                <textarea id="messageInput" class="chat-input" placeholder="Type your message here..." rows="1"></textarea>
+                <button id="sendButton" class="send-button">Send</button>
+            </div>
+            <div id="filePreview" class="file-preview"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
