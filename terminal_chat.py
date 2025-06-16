@@ -350,7 +350,7 @@ APP_SECRET_KEY=your-secret-key-here
 
         api_data = {
             'model': 'claude-sonnet-4-20250514',
-            'max_tokens': 6000,
+            'max_tokens': 10000,
             'messages': self.conversation["messages"]
         }
 
@@ -368,7 +368,7 @@ APP_SECRET_KEY=your-secret-key-here
                     'https://api.anthropic.com/v1/messages',
                     headers=headers,
                     json=api_data,
-                    timeout=60
+                    timeout=240
                 )
 
                 if response.status_code == 200:
