@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 import argparse
 import requests
+import glob
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -39,6 +40,10 @@ class TerminalClaudeChat:
     def __init__(self, conversation_file="terminal_conversation.json", env_file=".env"):
         self.console = Console()
         self.conversation_file = Path(conversation_file)
+        
+        # Create conversations directory
+        self.conversations_dir = Path("conversations")
+        self.conversations_dir.mkdir(exist_ok=True)
         
         # Load environment variables from .env file
         self.load_environment(env_file)
@@ -124,12 +129,62 @@ APP_SECRET_KEY=your-secret-key-here
         except Exception as e:
             self.console.print(f"[red]Error saving conversation: {e}[/red]")
 
+    def archive_current_conversation(self):
+        """Save current conversation to conversations directory with timestamp"""
+        if not self.conversation["messages"]:
+            return  # No messages to archive
+        
+        # Generate human-readable timestamp filename
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d_%I-%M%p")
+        archive_filename = f"{timestamp}.json"
+        archive_path = self.conversations_dir / archive_filename
+        
+        try:
+            # Save current conversation to archive
+            with open(archive_path, 'w', encoding='utf-8') as f:
+                json.dump(self.conversation, f, indent=2, ensure_ascii=False)
+            
+            self.console.print(f"[green]✓[/green] Archived conversation to {archive_filename}")
+            
+            # Clean up old conversations (keep only 10)
+            self.cleanup_old_conversations()
+            
+        except Exception as e:
+            self.console.print(f"[red]Error archiving conversation: {e}[/red]")
+
+    def cleanup_old_conversations(self):
+        """Keep only the 10 most recent conversation files"""
+        try:
+            # Get all conversation files (updated pattern)
+            pattern = str(self.conversations_dir / "*.json")
+            conversation_files = glob.glob(pattern)
+            
+            # Sort by modification time (newest first)
+            conversation_files.sort(key=os.path.getmtime, reverse=True)
+            
+            # Delete files beyond the 10 most recent
+            for old_file in conversation_files[10:]:
+                os.remove(old_file)
+                filename = Path(old_file).name
+                self.console.print(f"[dim]Deleted old conversation: {filename}[/dim]")
+                
+        except Exception as e:
+            self.console.print(f"[red]Error cleaning up old conversations: {e}[/red]")
+
     def create_new_conversation(self):
         """Create a new conversation"""
         if self.conversation["messages"]:
-            if confirm("Start a new conversation? Current conversation will be saved."):
-                self.save_conversation()
+            if confirm("Start a new conversation? Current conversation will be archived."):
+                # Archive current conversation before creating new one
+                self.archive_current_conversation()
+                
+                # Create new conversation
                 self.conversation = {"messages": [], "created_at": datetime.now().isoformat()}
+                
+                # Save the new empty conversation as the current one
+                self.save_conversation()
+                
                 self.console.print("[green]✓[/green] Started new conversation")
                 return True
         else:
@@ -398,17 +453,19 @@ APP_SECRET_KEY=your-secret-key-here
                 return None
 
     def display_response(self, response):
-        """Display Claude's response with markdown formatting"""
-        # Create a panel with Claude's response
+        """Display Claude's response with color dividers instead of full border"""
+        # Create top divider
+        divider = "─" * (self.console.size.width - 4)
+        
+        self.console.print(f"[blue]┌─ Claude {divider}[/blue]")
+        
+        # Display the markdown content without border
         markdown_content = Markdown(response)
-        panel = Panel(
-            markdown_content,
-            title="Claude",
-            title_align="left",
-            border_style="blue",
-            padding=(1, 2)
-        )
-        self.console.print(panel)
+        self.console.print(markdown_content)
+        
+        # Create bottom divider
+        self.console.print(f"[blue]└{divider}─[/blue]")
+        self.console.print()
 
     def display_welcome(self):
         """Display welcome message"""

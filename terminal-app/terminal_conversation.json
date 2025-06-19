@@ -1,0 +1,21 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "this is a test"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I can see this is a test message. I'm working properly and ready to help you with any questions or tasks you might have. Is there anything specific you'd like to test or discuss?"
+    },
+    {
+      "role": "user",
+      "content": "this si another test"
+    },
+    {
+      "role": "assistant",
+      "content": "Got it! I can see your second test message (with the small typo - \"si\" instead of \"is\"). I'm still here and responding normally. Feel free to continue testing or let me know if you'd like to move on to something else!"
+    }
+  ],
+  "created_at": "2025-06-19T13:42:31.091314"
+}

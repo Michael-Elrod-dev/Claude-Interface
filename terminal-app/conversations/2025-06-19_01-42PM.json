@@ -1,0 +1,13 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "this is a test"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I can see this is a test message. I'm working properly and ready to help you with any questions or tasks you might have. Is there anything specific you'd like to test or discuss?"
+    }
+  ],
+  "created_at": "2025-06-19T13:40:47.016111"
+}
