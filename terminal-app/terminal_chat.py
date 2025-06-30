@@ -5,7 +5,6 @@ A command-line interface for chatting with Claude AI with file support and markd
 """
 
 import os
-import sys
 import json
 import base64
 import mimetypes
@@ -14,6 +13,7 @@ from pathlib import Path
 import argparse
 import requests
 import glob
+import pytz
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -22,11 +22,7 @@ from dotenv import load_dotenv
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
-from rich.text import Text
-from rich.prompt import Prompt
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.syntax import Syntax
-from rich.table import Table
 
 # Prompt toolkit for advanced input handling
 from prompt_toolkit import prompt
@@ -63,6 +59,13 @@ class TerminalClaudeChat:
         self.completer = WordCompleter([
             '/help', '/new', '/load', '/save', '/attach', '/clear', '/quit', '/exit'
         ])
+
+        # Use Eastern Time for initial conversation
+        eastern = pytz.timezone('US/Eastern')
+        self.conversation = {
+            "messages": [], 
+            "created_at": datetime.now(eastern).isoformat()
+        }
 
     def load_environment(self, env_file):
         """Load environment variables from .env file"""
@@ -134,8 +137,9 @@ APP_SECRET_KEY=your-secret-key-here
         if not self.conversation["messages"]:
             return  # No messages to archive
         
-        # Generate human-readable timestamp filename
-        now = datetime.now()
+        # Generate human-readable timestamp filename using Eastern Time
+        eastern = pytz.timezone('US/Eastern')  # Changed from ZoneInfo
+        now = datetime.now(eastern)
         timestamp = now.strftime("%Y-%m-%d_%I-%M%p")
         archive_filename = f"{timestamp}.json"
         archive_path = self.conversations_dir / archive_filename
@@ -179,8 +183,12 @@ APP_SECRET_KEY=your-secret-key-here
                 # Archive current conversation before creating new one
                 self.archive_current_conversation()
                 
-                # Create new conversation
-                self.conversation = {"messages": [], "created_at": datetime.now().isoformat()}
+                # Create new conversation with Eastern Time
+                eastern = pytz.timezone('US/Eastern')  # Changed from ZoneInfo
+                self.conversation = {
+                    "messages": [], 
+                    "created_at": datetime.now(eastern).isoformat()
+                }
                 
                 # Save the new empty conversation as the current one
                 self.save_conversation()
@@ -188,7 +196,11 @@ APP_SECRET_KEY=your-secret-key-here
                 self.console.print("[green]✓[/green] Started new conversation")
                 return True
         else:
-            self.conversation = {"messages": [], "created_at": datetime.now().isoformat()}
+            eastern = pytz.timezone('US/Eastern')  # Changed from ZoneInfo
+            self.conversation = {
+                "messages": [], 
+                "created_at": datetime.now(eastern).isoformat()
+            }
             self.console.print("[green]✓[/green] Started new conversation")
             return True
         return False
@@ -355,10 +367,43 @@ APP_SECRET_KEY=your-secret-key-here
                         continue
                     elif command == '/load':
                         if len(command_parts) > 1:
-                            self.conversation_file = Path(command_parts[1])
-                            self.load_conversation()
+                            filename = command_parts[1]
+                            
+                            # Always look only in conversations directory
+                            file_path = self.conversations_dir / filename
+                            
+                            # Add .json extension if not present
+                            if not filename.endswith('.json'):
+                                file_path = file_path.with_suffix('.json')
+                            
+                            if file_path.exists():
+                                self.conversation_file = file_path
+                                self.load_conversation()
+                            else:
+                                self.console.print(f"[red]File not found in conversations directory: {filename}[/red]")
+                                # Show available files in conversations directory
+                                conv_files = list(self.conversations_dir.glob("*.json"))
+                                if conv_files:
+                                    self.console.print("[yellow]Available conversations:[/yellow]")
+                                    for f in conv_files:
+                                        self.console.print(f"  - {f.name}")
+                                else:
+                                    self.console.print("[dim]No conversation files found in conversations directory[/dim]")
                         else:
                             self.console.print("[yellow]Usage: /load <conversation_file>[/yellow]")
+                        continue
+                    elif command == '/list':
+                        conv_files = list(self.conversations_dir.glob("*.json"))
+                        if conv_files:
+                            self.console.print("[yellow]Available conversations:[/yellow]")
+                            # Sort by modification time (newest first)
+                            conv_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                            for f in conv_files:
+                                # Show filename without .json extension
+                                display_name = f.stem
+                                self.console.print(f"  - {display_name}")
+                        else:
+                            self.console.print("[dim]No conversation files found[/dim]")
                         continue
                     else:
                         self.console.print(f"[red]Unknown command: {command}[/red]")
