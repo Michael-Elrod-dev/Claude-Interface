@@ -45,11 +45,11 @@ class TerminalClaudeChat:
         self.load_environment(env_file)
         
         self.api_key = os.getenv('ANTHROPIC_API_KEY')
-        self.conversation = {"messages": [], "created_at": datetime.now().isoformat()}
-        self.history_file = Path("terminal_chat_history.txt")
         
-        # Load existing conversation if it exists
-        self.load_conversation()
+        # Load the most recent conversation (either current or archived)
+        self.load_most_recent_conversation()
+        
+        self.history_file = Path("terminal_chat_history.txt")
         
         # Set up key bindings for prompt-toolkit
         self.bindings = KeyBindings()
@@ -57,15 +57,8 @@ class TerminalClaudeChat:
         
         # Command completer
         self.completer = WordCompleter([
-            '/help', '/new', '/load', '/save', '/attach', '/clear', '/quit', '/exit'
+            '/help', '/new', '/load', '/save', '/attach', '/clear', '/quit', '/exit', '/list'
         ])
-
-        # Use Eastern Time for initial conversation
-        eastern = pytz.timezone('US/Eastern')
-        self.conversation = {
-            "messages": [], 
-            "created_at": datetime.now(eastern).isoformat()
-        }
 
     def load_environment(self, env_file):
         """Load environment variables from .env file"""
@@ -184,7 +177,7 @@ APP_SECRET_KEY=your-secret-key-here
                 self.archive_current_conversation()
                 
                 # Create new conversation with Eastern Time
-                eastern = pytz.timezone('US/Eastern')  # Changed from ZoneInfo
+                eastern = pytz.timezone('US/Eastern')
                 self.conversation = {
                     "messages": [], 
                     "created_at": datetime.now(eastern).isoformat()
@@ -196,7 +189,7 @@ APP_SECRET_KEY=your-secret-key-here
                 self.console.print("[green]✓[/green] Started new conversation")
                 return True
         else:
-            eastern = pytz.timezone('US/Eastern')  # Changed from ZoneInfo
+            eastern = pytz.timezone('US/Eastern')
             self.conversation = {
                 "messages": [], 
                 "created_at": datetime.now(eastern).isoformat()
@@ -496,6 +489,54 @@ APP_SECRET_KEY=your-secret-key-here
             except Exception as e:
                 self.console.print(f"[red]Error: {e}[/red]")
                 return None
+            
+    def load_most_recent_conversation(self):
+        """Load the most recent conversation from either current file or archived conversations"""
+        try:
+            # Get all conversation files (both current and archived)
+            all_conversations = []
+            
+            # Add current conversation file if it exists
+            if self.conversation_file.exists():
+                all_conversations.append(self.conversation_file)
+            
+            # Add all archived conversations
+            archived_conversations = list(self.conversations_dir.glob("*.json"))
+            all_conversations.extend(archived_conversations)
+            
+            if not all_conversations:
+                # No conversations found, start fresh
+                eastern = pytz.timezone('US/Eastern')
+                self.conversation = {
+                    "messages": [], 
+                    "created_at": datetime.now(eastern).isoformat()
+                }
+                return
+            
+            # Sort by modification time (most recent first)
+            all_conversations.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+            most_recent = all_conversations[0]
+            
+            # Load the most recent conversation
+            with open(most_recent, 'r', encoding='utf-8') as f:
+                self.conversation = json.load(f)
+            
+            # If we loaded from archive, copy it back to current conversation file
+            if most_recent != self.conversation_file:
+                self.conversation_file = Path("terminal_conversation.json")  # Reset to default
+                self.save_conversation()
+                self.console.print(f"[green]✓[/green] Resumed most recent conversation from {most_recent.name}")
+            else:
+                self.console.print(f"[green]✓[/green] Loaded current conversation")
+                
+        except Exception as e:
+            self.console.print(f"[red]Error loading most recent conversation: {e}[/red]")
+            # Fall back to empty conversation
+            eastern = pytz.timezone('US/Eastern')
+            self.conversation = {
+                "messages": [], 
+                "created_at": datetime.now(eastern).isoformat()
+            }
 
     def display_response(self, response):
         """Display Claude's response with color dividers instead of full border"""

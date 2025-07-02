@@ -1,4 +1,5 @@
 *.tar.gz
 *.pem
-.env
+*.env
 *.json
+*.txt
