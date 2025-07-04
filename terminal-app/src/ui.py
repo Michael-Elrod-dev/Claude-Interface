@@ -21,6 +21,7 @@ class UIManager:
 - `/clear` - Clear the screen
 - `/quit` or `/exit` - Exit the application
 - `/model [sonnet|opus]` - Switch models or show current model
+- `/cleanup` - Clean up files and directories (conversations, cache, etc.)
 
 **Files API:**
 - `/files` - Show files commands

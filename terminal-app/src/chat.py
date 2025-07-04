@@ -530,6 +530,9 @@ class TerminalClaudeChat:
                         else:
                             self.console.print("[dim]No conversation files found[/dim]")
                         continue
+                    elif command == '/cleanup':
+                        self.handle_cleanup_command()
+                        continue
                     else:
                         self.console.print(f"[red]Unknown command: {command}[/red]")
                         self.console.print("Type /help for available commands")
@@ -673,6 +676,76 @@ class TerminalClaudeChat:
         
         return api_messages
             
+    def handle_cleanup_command(self):
+        """Clean up various files and directories"""
+        
+        items_to_clean = [
+            ("conversations/", "Conversation archives"),
+            ("chat_history.txt", "Chat history file"),
+            ("conversation.json", "Current conversation"),
+            ("src/__pycache__/", "Python cache files"),
+        ]
+        
+        self.console.print("[yellow]🧹 Cleanup Tool[/yellow]")
+        self.console.print("[dim]This will delete the following items if they exist:[/dim]")
+        
+        # Show what will be deleted
+        for item, description in items_to_clean:
+            path = Path(item)
+            if path.exists():
+                self.console.print(f"  ✓ {item} - {description}")
+            else:
+                self.console.print(f"  - {item} - {description} (not found)")
+        
+        # Ask about temp_uploads separately
+        temp_uploads = Path("temp_uploads")
+        include_temp = False
+        if temp_uploads.exists():
+            self.console.print(f"\n[cyan]temp_uploads/ directory found[/cyan]")
+            include_temp = confirm("Include temp_uploads/ in cleanup?")
+            if include_temp:
+                items_to_clean.append(("temp_uploads/", "Temporary upload files"))
+        
+        # Final confirmation
+        self.console.print(f"\n[red]⚠️  This action cannot be undone![/red]")
+        if not confirm("Proceed with cleanup?"):
+            self.console.print("[dim]Cleanup cancelled[/dim]")
+            return
+        
+        # Perform cleanup
+        deleted_count = 0
+        for item, description in items_to_clean:
+            path = Path(item)
+            try:
+                if path.exists():
+                    if path.is_file():
+                        path.unlink()
+                        self.console.print(f"[green]✓[/green] Deleted {item}")
+                        deleted_count += 1
+                    elif path.is_dir():
+                        import shutil
+                        shutil.rmtree(path)
+                        self.console.print(f"[green]✓[/green] Deleted {item}")
+                        deleted_count += 1
+            except Exception as e:
+                self.console.print(f"[red]✗[/red] Failed to delete {item}: {e}")
+        
+        self.console.print(f"\n[green]🎉 Cleanup complete! Deleted {deleted_count} items[/green]")
+        
+        # Create a completely fresh conversation without trying to archive
+        if deleted_count > 0:
+            self.console.print("[dim]Starting fresh conversation...[/dim]")
+            eastern = pytz.timezone('US/Eastern')
+            self.conversation = {
+                "messages": [], 
+                "created_at": datetime.now(eastern).isoformat(),
+                "current_model": self.current_model,
+            }
+            self.save_conversation()
+            self.console.print("[green]✓[/green] Fresh conversation started")
+            model_display = self.get_model_display_name(self.current_model)
+            self.console.print(f"[dim]Using model: {model_display}[/dim]")
+
     def load_most_recent_conversation(self):
         """Load the most recent conversation from either current file or archived conversations"""
         try:
