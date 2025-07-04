@@ -43,7 +43,7 @@ class TerminalClaudeChat:
         'opus': 'claude-opus-4-20250514'
     }
     
-    def __init__(self, conversation_file="terminal_conversation.json", env_file=".env"):
+    def __init__(self, conversation_file="conversation.json", env_file=".env"):
         self.console = Console()
         self.conversation_file = Path(conversation_file)
         
@@ -83,7 +83,7 @@ class TerminalClaudeChat:
         # Load the most recent conversation
         self.load_most_recent_conversation()
         
-        self.history_file = Path("terminal_chat_history.txt")
+        self.history_file = Path("chat_history.txt")
         
         # Set up key bindings for prompt-toolkit
         self.bindings = KeyBindings()
@@ -656,9 +656,6 @@ class TerminalClaudeChat:
                 "content": msg["content"]
             }
             
-            # If there are uploaded files and this is a user message, we could add file context
-            # This would need to be implemented based on your specific needs
-            
             api_messages.append(clean_msg)
         
         return api_messages
@@ -704,7 +701,7 @@ class TerminalClaudeChat:
             
             # If we loaded from archive, copy it back to current conversation file
             if most_recent != self.conversation_file:
-                self.conversation_file = Path("terminal_conversation.json")  # Reset to default
+                self.conversation_file = Path("conversation.json")  # Reset to default
                 self.save_conversation()
                 self.console.print(f"[green]✓[/green] Resumed most recent conversation from {most_recent.name}")
             else:
@@ -800,8 +797,8 @@ def main():
     parser.add_argument(
         "--conversation", 
         "-c", 
-        default="terminal_conversation.json",
-        help="Conversation file to load/save (default: terminal_conversation.json)"
+        default="conversation.json",
+        help="Conversation file to load/save (default: conversation.json)"
     )
     parser.add_argument(
         "--new", 

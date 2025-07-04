@@ -1,0 +1,16 @@
+# Core Anthropic API
+anthropic
+
+# Terminal UI and display
+rich
+prompt-toolkit
+
+# Environment and configuration
+python-dotenv
+
+# File processing
+PyPDF2
+Pillow
+
+# Date/time handling
+pytz

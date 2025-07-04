@@ -1,6 +1,7 @@
 *.tar.gz
 *.pem
 *.env
-*.json
-*.txt
+chat_history.txt
+conversation.json
+files_registry.json
 __pycache__/
