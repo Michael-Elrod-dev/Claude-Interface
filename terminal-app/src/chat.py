@@ -199,6 +199,7 @@ class TerminalClaudeChat:
             self.console.print("  /files remove <file_id> - Remove file from Files API")
             self.console.print("  /files clear - Remove ALL files")
             self.console.print("  /files use <file_id|filename> - Include file in next message")
+            self.console.print("  /files scp - Show SCP command template for file transfer")
             return
 
         parts = args.split(' ', 1)
@@ -287,6 +288,18 @@ class TerminalClaudeChat:
                 self.console.print(f"[green]✓[/green] Deleted {deleted_count} file(s)")
             else:
                 self.console.print("[dim]Cancelled[/dim]")
+        elif subcommand == 'scp':
+            # Create temp directory if it doesn't exist
+            temp_dir = Path("temp_uploads")
+            temp_dir.mkdir(exist_ok=True)
+            
+            # Get the absolute path of the temp directory
+            abs_temp_path = temp_dir.resolve()
+            
+            self.console.print(f"[cyan]📋 SCP Command Template:[/cyan]")
+            self.console.print(f"[yellow]scp /path/to/your/file ec2-user@35.174.114.116:{abs_temp_path}/[/yellow]")
+            self.console.print()
+            self.console.print(f"[green]Then run: /files add temp_uploads/filename[/green]")
         else:
             self.console.print(f"[red]Unknown files subcommand: {subcommand}[/red]")
 
