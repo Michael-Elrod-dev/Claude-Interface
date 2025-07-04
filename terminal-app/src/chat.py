@@ -680,20 +680,27 @@ class TerminalClaudeChat:
         """Clean up various files and directories"""
         
         items_to_clean = [
-            ("conversations/", "Conversation archives"),
-            ("chat_history.txt", "Chat history file"),
-            ("conversation.json", "Current conversation"),
-            ("src/__pycache__/", "Python cache files"),
+            ("conversations/", "Conversation archives", "folder_contents"),
+            ("chat_history.txt", "Chat history file", "file"),
+            ("conversation.json", "Current conversation", "file"),
+            ("src/__pycache__/", "Python cache files", "folder_contents"),
         ]
         
         self.console.print("[yellow]🧹 Cleanup Tool[/yellow]")
         self.console.print("[dim]This will delete the following items if they exist:[/dim]")
         
         # Show what will be deleted
-        for item, description in items_to_clean:
+        for item, description, cleanup_type in items_to_clean:
             path = Path(item)
             if path.exists():
-                self.console.print(f"  ✓ {item} - {description}")
+                if cleanup_type == "folder_contents" and path.is_dir():
+                    contents = list(path.glob("*"))
+                    if contents:
+                        self.console.print(f"  ✓ {item} - {description} ({len(contents)} items)")
+                    else:
+                        self.console.print(f"  - {item} - {description} (empty)")
+                else:
+                    self.console.print(f"  ✓ {item} - {description}")
             else:
                 self.console.print(f"  - {item} - {description} (not found)")
         
@@ -701,10 +708,14 @@ class TerminalClaudeChat:
         temp_uploads = Path("temp_uploads")
         include_temp = False
         if temp_uploads.exists():
-            self.console.print(f"\n[cyan]temp_uploads/ directory found[/cyan]")
-            include_temp = confirm("Include temp_uploads/ in cleanup?")
-            if include_temp:
-                items_to_clean.append(("temp_uploads/", "Temporary upload files"))
+            temp_contents = list(temp_uploads.glob("*"))
+            if temp_contents:
+                self.console.print(f"\n[cyan]temp_uploads/ directory found ({len(temp_contents)} items)[/cyan]")
+                include_temp = confirm("Include temp_uploads/ contents in cleanup?")
+                if include_temp:
+                    items_to_clean.append(("temp_uploads/", "Temporary upload files", "folder_contents"))
+            else:
+                self.console.print(f"\n[dim]temp_uploads/ directory is empty[/dim]")
         
         # Final confirmation
         self.console.print(f"\n[red]⚠️  This action cannot be undone![/red]")
@@ -714,21 +725,27 @@ class TerminalClaudeChat:
         
         # Perform cleanup
         deleted_count = 0
-        for item, description in items_to_clean:
+        for item, description, cleanup_type in items_to_clean:
             path = Path(item)
             try:
                 if path.exists():
-                    if path.is_file():
+                    if cleanup_type == "folder_contents" and path.is_dir():
+                        # Delete contents but keep the folder
+                        import shutil
+                        for content in path.glob("*"):
+                            if content.is_file():
+                                content.unlink()
+                                deleted_count += 1
+                            elif content.is_dir():
+                                shutil.rmtree(content)
+                                deleted_count += 1
+                        self.console.print(f"[green]✓[/green] Cleared contents of {item}")
+                    elif cleanup_type == "file" and path.is_file():
                         path.unlink()
                         self.console.print(f"[green]✓[/green] Deleted {item}")
                         deleted_count += 1
-                    elif path.is_dir():
-                        import shutil
-                        shutil.rmtree(path)
-                        self.console.print(f"[green]✓[/green] Deleted {item}")
-                        deleted_count += 1
             except Exception as e:
-                self.console.print(f"[red]✗[/red] Failed to delete {item}: {e}")
+                self.console.print(f"[red]✗[/red] Failed to clean {item}: {e}")
         
         self.console.print(f"\n[green]🎉 Cleanup complete! Deleted {deleted_count} items[/green]")
         
