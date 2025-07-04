@@ -143,9 +143,9 @@ class TerminalClaudeChat:
             self.console.print(f"[blue]Current model: {current_display}[/blue]")
             self.console.print("[yellow]Available models:[/yellow]")
             for key, model_id in self.AVAILABLE_MODELS.items():
-                display_name = self.get_model_display_name(model_id)
                 marker = " (current)" if model_id == self.current_model else ""
-                self.console.print(f"  - {key}: {display_name}{marker}")
+                # Show just the key and full model version
+                self.console.print(f"  - {key}: {model_id}{marker}")
             self.console.print("[dim]Usage: /model <sonnet|opus>[/dim]")
             return
 
