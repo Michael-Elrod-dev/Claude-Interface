@@ -212,11 +212,13 @@ class TerminalClaudeChat:
                 
                 # Display recent messages
                 recent = self.conversation_manager.get_messages_for_display()
-                model_names = {
-                    model_id: ModelUtils.get_model_display_name(model_id)
-                    for model_id in [DEFAULT_MODEL] + list(ModelUtils.get_model_display_name.func.__code__.co_consts)
-                    if isinstance(model_id, str) and model_id.startswith('claude-')
-                }
+
+                # Build model display names from our config
+                from .config import AVAILABLE_MODELS
+                model_names = {}
+                for key, model_id in AVAILABLE_MODELS.items():
+                    model_names[model_id] = ModelUtils.get_model_display_name(model_id)
+
                 self.display.display_conversation_history(recent, model_names)
             
             # Main loop
