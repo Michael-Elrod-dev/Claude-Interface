@@ -5,7 +5,7 @@ Input validation and utility functions for Terminal Claude Chat.
 from pathlib import Path
 from typing import Optional, Tuple
 
-from ..config import AVAILABLE_MODELS, COMMAND_PREFIX, AVAILABLE_COMMANDS
+from ..config import AVAILABLE_MODELS, AVAILABLE_COMMANDS
 
 
 class Validators:

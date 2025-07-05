@@ -3,8 +3,6 @@ Conversation management logic.
 """
 
 from typing import Optional, List, Dict, Any, Union
-from datetime import datetime
-import pytz
 
 from .models import Conversation, Message
 from ..config import DEFAULT_MODEL

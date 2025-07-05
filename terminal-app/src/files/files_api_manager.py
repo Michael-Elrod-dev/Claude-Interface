@@ -14,7 +14,6 @@ from ..config import (
     NO_EXTENSION_TEXT_FILES
 )
 from ..storage.file_registry import FileRegistry
-from ..core.models import FileInfo
 
 
 class FilesAPIManager:

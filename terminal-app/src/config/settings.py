@@ -92,8 +92,7 @@ MAX_TOKENS = 8192
 # UI settings
 DEFAULT_TIMEZONE = 'US/Eastern'
 
-# Command prefixes
-COMMAND_PREFIX = '/'
+# Commands
 AVAILABLE_COMMANDS = [
     '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit', 
     '/list', '/model', '/files', '/cleanup', '/copy'

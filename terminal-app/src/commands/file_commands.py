@@ -7,7 +7,6 @@ from typing import Optional
 from prompt_toolkit.shortcuts import confirm
 
 from .base import BaseCommand
-from ..config import TEMP_UPLOADS_DIR
 
 
 class FilesCommand(BaseCommand):

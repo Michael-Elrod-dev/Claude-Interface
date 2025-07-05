@@ -2,7 +2,6 @@
 Command handlers for Terminal Claude Chat.
 """
 
-from typing import Dict, Type
 from .base import BaseCommand
 from .chat_commands import (
     NewCommand, ClearCommand, QuitCommand, ExitCommand,

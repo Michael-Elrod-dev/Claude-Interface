@@ -2,7 +2,7 @@
 Claude API interaction service.
 """
 
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any
 from anthropic import Anthropic
 from rich.progress import Progress, SpinnerColumn, TextColumn
 

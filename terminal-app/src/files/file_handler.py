@@ -2,15 +2,13 @@
 File handling functionality for the Terminal Claude Chat application.
 """
 
+import io
 import base64
+import PyPDF2
 import mimetypes
+from PIL import Image
 from pathlib import Path
 from typing import Optional, Dict
-import PyPDF2
-import io
-from PIL import Image
-
-from ..config import SUPPORTED_DOCUMENTS, SUPPORTED_IMAGES
 
 
 class FileHandler:

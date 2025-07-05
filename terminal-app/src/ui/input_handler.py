@@ -3,7 +3,7 @@ Input handling and key bindings for Terminal Claude Chat.
 """
 
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple
 
 from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory

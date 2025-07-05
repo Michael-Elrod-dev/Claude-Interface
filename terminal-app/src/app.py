@@ -9,10 +9,10 @@ from rich.console import Console
 from .config import EnvironmentConfig, DEFAULT_MODEL, DEFAULT_CONVERSATION_FILE
 from .core import ConversationManager
 from .core.chat_service import ChatService
-from .storage import ConversationStore, FileRegistry
+from .storage import ConversationStore
 from .files import FileHandler, FilesAPIManager
 from .ui import DisplayManager, InputHandler
-from .utils import ModelUtils, Validators, FileUtils
+from .utils import ModelUtils, Validators
 from .commands import COMMAND_REGISTRY
 
 
