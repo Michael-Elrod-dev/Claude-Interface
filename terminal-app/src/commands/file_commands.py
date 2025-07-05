@@ -119,7 +119,7 @@ class FilesCommand(BaseCommand):
     
     def _show_scp_info(self):
         """Show SCP command template"""
-        from ..config import DATA_DIR
+        from ..config import TEMP_UPLOADS_DIR
         
         # Create temp directory if it doesn't exist
         temp_dir = Path(TEMP_UPLOADS_DIR)

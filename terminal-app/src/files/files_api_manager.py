@@ -35,9 +35,32 @@ class FilesAPIManager:
         try:
             path = Path(file_path).expanduser().resolve()
             
+            # If file doesn't exist at the given path, check temp_uploads
             if not path.exists():
-                self.console.print(f"[red]File not found: {file_path}[/red]")
-                return None
+                # Try in temp_uploads directory
+                from ..config import TEMP_UPLOADS_DIR
+                temp_path = Path(TEMP_UPLOADS_DIR) / file_path
+                
+                if temp_path.exists():
+                    path = temp_path.resolve()
+                    self.console.print(f"[dim]Found file in temp_uploads directory[/dim]")
+                else:
+                    # Still not found - show helpful error
+                    self.console.print(f"[red]File not found: {file_path}[/red]")
+                    
+                    # Check if temp_uploads exists and list files if any
+                    temp_dir = Path(TEMP_UPLOADS_DIR)
+                    if temp_dir.exists():
+                        files_in_temp = list(temp_dir.glob("*"))
+                        if files_in_temp:
+                            self.console.print(f"[yellow]Available files in {TEMP_UPLOADS_DIR}:[/yellow]")
+                            for f in files_in_temp:
+                                if f.is_file():
+                                    self.console.print(f"  - {f.name}")
+                        else:
+                            self.console.print(f"[dim]No files found in {TEMP_UPLOADS_DIR}/[/dim]")
+                    
+                    return None
 
             # Check file size
             file_size = path.stat().st_size
