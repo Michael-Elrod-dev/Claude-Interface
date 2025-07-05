@@ -184,3 +184,55 @@ class CleanupCommand(BaseCommand):
                 self.console.print(f"[red]✗[/red] Failed to clean {item}: {e}")
         
         return deleted_count
+
+
+class CopyCommand(BaseCommand):
+    """Display last assistant response without formatting for easy copying"""
+    
+    @property
+    def name(self) -> str:
+        return "/copy"
+    
+    @property
+    def description(self) -> str:
+        return "Display last response without formatting for easy copying"
+    
+    def execute(self, args: Optional[str] = None) -> bool:
+        if not self.app_context.conversation_manager.has_messages():
+            self.console.print("[yellow]No messages to copy[/yellow]")
+            return True
+        
+        # Get the last assistant message
+        messages = self.app_context.conversation_manager.conversation.messages
+        last_assistant_message = None
+        
+        # Find the most recent assistant message
+        for message in reversed(messages):
+            if message.role == "assistant":
+                last_assistant_message = message
+                break
+        
+        if not last_assistant_message:
+            self.console.print("[yellow]No assistant response found to copy[/yellow]")
+            return True
+        
+        # Display the raw content without any formatting
+        self.console.print("\n" + "="*60)
+        self.console.print("RAW CONTENT (copy-friendly):")
+        self.console.print("="*60)
+        
+        # Print the raw content directly without Rich formatting
+        raw_content = last_assistant_message.content
+        if isinstance(raw_content, str):
+            # Use print() instead of self.console.print() to avoid Rich formatting
+            print(raw_content)
+        else:
+            # Handle list content (shouldn't happen with current implementation but good to be safe)
+            for item in raw_content:
+                if isinstance(item, dict) and item.get("type") == "text":
+                    print(item.get("text", ""))
+        
+        self.console.print("="*60)
+        self.console.print("[dim]Tip: Select and copy the text above (excludes the === lines)[/dim]")
+        
+        return True

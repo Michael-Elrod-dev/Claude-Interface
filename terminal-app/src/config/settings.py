@@ -96,5 +96,5 @@ DEFAULT_TIMEZONE = 'US/Eastern'
 COMMAND_PREFIX = '/'
 AVAILABLE_COMMANDS = [
     '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit', 
-    '/list', '/model', '/files', '/cleanup'
+    '/list', '/model', '/files', '/cleanup', '/copy'
 ]

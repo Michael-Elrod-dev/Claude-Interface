@@ -56,6 +56,7 @@ Type your first message below!
 - `/quit` or `/exit` - Exit the application
 - `/model [sonnet|opus]` - Switch models or show current model
 - `/cleanup` - Clean up files and directories (conversations, cache, etc.)
+- `/copy` - Display last response without formatting for easy copying
 
 **Files API:**
 - `/files` - Show files commands
@@ -73,6 +74,7 @@ Type your first message below!
 - 📎 **Files API**: Upload files once, reference them throughout the conversation
 - 🔄 **Model Switching**: Switch between models mid-conversation with context preserved
 - 💾 **Persistent Storage**: Conversations and uploaded files persist across sessions
+- 📋 **Copy-Friendly Output**: Use `/copy` to get clean text without formatting
 
 **Configuration:**
 - API key is loaded from `.env` file
@@ -81,6 +83,7 @@ Type your first message below!
 **Usage Tips:**
 - Files uploaded via `/files add` persist across sessions
 - Mention a filename in your message to auto-include it
+- Use `/copy` after Claude responds with code to get clean, copyable text
 """
         self.console.print(Markdown(help_text))
     
