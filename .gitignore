@@ -1,7 +1,25 @@
-*.tar.gz
-*.pem
-*.env
-chat_history.txt
-conversation.json
-files_registry.json
+# Environment variables
+.env
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Data directory - all runtime files
+data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

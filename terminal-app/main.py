@@ -4,7 +4,7 @@ Terminal Claude Chat Application
 Entry point for the command-line interface for chatting with Claude AI.
 """
 
-from src.chat import main
+from src import main
 
 if __name__ == "__main__":
     main()

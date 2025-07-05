@@ -10,12 +10,14 @@ import PyPDF2
 import io
 from PIL import Image
 
+from ..config import SUPPORTED_DOCUMENTS, SUPPORTED_IMAGES
+
 
 class FileHandler:
+    """Handles local file processing for attachments"""
+    
     def __init__(self, console):
         self.console = console
-        self.supported_documents = {'.pdf', '.docx', '.txt', '.md', '.rtf'}
-        self.supported_images = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
 
     def process_file(self, file_path: str) -> Optional[Dict]:
         """Process a file for attachment to Claude"""
