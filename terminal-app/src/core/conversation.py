@@ -84,13 +84,7 @@ class ConversationManager:
         # Add pending file reference if any
         pending_ref = self.get_pending_file_reference()
         if pending_ref:
-            file_ref = {
-                "type": "document",
-                "source": {
-                    "type": "file",
-                    "file_id": pending_ref['id']
-                }
-            }
+            file_ref = self._create_file_reference(pending_ref)
             content.append(file_ref)
         
         # Auto-reference files mentioned in the message
@@ -99,13 +93,7 @@ class ConversationManager:
                 filename = file_info['filename']
                 # Check if filename is mentioned and not already included
                 if filename.lower() in user_input.lower() and file_info != pending_ref:
-                    file_ref = {
-                        "type": "document",
-                        "source": {
-                            "type": "file",
-                            "file_id": file_info['id']
-                        }
-                    }
+                    file_ref = self._create_file_reference(file_info)
                     content.append(file_ref)
         
         # Return appropriate format
@@ -113,3 +101,26 @@ class ConversationManager:
             return content[0]["text"]
         else:
             return content
+
+    def _create_file_reference(self, file_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Create the appropriate file reference based on MIME type"""
+        mime_type = file_info.get('mime_type', '')
+        
+        if mime_type.startswith('image/'):
+            # Images use the image content block
+            return {
+                "type": "image",
+                "source": {
+                    "type": "file",
+                    "file_id": file_info['id']
+                }
+            }
+        else:
+            # PDFs and text files use the document content block
+            return {
+                "type": "document", 
+                "source": {
+                    "type": "file",
+                    "file_id": file_info['id']
+                }
+            }

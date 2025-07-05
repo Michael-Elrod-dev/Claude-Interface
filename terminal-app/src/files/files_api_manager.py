@@ -174,18 +174,20 @@ class FilesAPIManager:
         return deleted_count
 
     def _get_mime_type(self, path: Path) -> str:
-        """Get MIME type for a file, forcing text-based files to text/plain"""
+        """Get MIME type for a file, preserving native types for Files API"""
         mime_type, _ = mimetypes.guess_type(str(path))
-        
-        # Handle files without extensions
         filename = path.name.lower()
         
+        # Force text files to text/plain for consistency
         if (path.suffix.lower() in TEXT_EXTENSIONS or 
             filename in NO_EXTENSION_TEXT_FILES or
             (mime_type and mime_type.startswith('text/'))):
             return 'text/plain'
-        elif mime_type == 'application/pdf':
-            return 'application/pdf'
+        
+        # Preserve native types for Files API supported formats
+        elif mime_type in ['application/pdf'] or (mime_type and mime_type.startswith('image/')):
+            return mime_type
+        
+        # Default to text/plain for unknown types
         else:
-            # For unknown files, try as plaintext
             return 'text/plain'
