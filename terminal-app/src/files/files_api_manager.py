@@ -8,10 +8,10 @@ from typing import Dict, List, Optional
 from anthropic import Anthropic
 
 from ..config import (
-    ANTHROPIC_BETA_HEADER, 
     MAX_FILE_SIZE_MB, 
     TEXT_EXTENSIONS,
-    NO_EXTENSION_TEXT_FILES
+    NO_EXTENSION_TEXT_FILES,
+    ANTHROPIC_CACHE_HEADERS
 )
 from ..storage.file_registry import FileRegistry
 
@@ -23,7 +23,7 @@ class FilesAPIManager:
         self.client = Anthropic(
             api_key=api_key,
             default_headers={
-                "anthropic-beta": ANTHROPIC_BETA_HEADER
+                "anthropic-beta": ANTHROPIC_CACHE_HEADERS
             }
         )
         self.console = console

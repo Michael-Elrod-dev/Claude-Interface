@@ -4,6 +4,8 @@ anthropic
 # Terminal UI and display
 rich
 prompt-toolkit
+ipython
+traitlets
 
 # Environment and configuration
 python-dotenv

@@ -11,6 +11,11 @@ AVAILABLE_MODELS = {
 # Default model
 DEFAULT_MODEL = AVAILABLE_MODELS['sonnet']
 
+# Anthropic API settings
+ANTHROPIC_BETA_HEADER = "files-api-2025-04-14"
+ANTHROPIC_CACHE_HEADERS = f"{ANTHROPIC_BETA_HEADER},prompt-caching-2024-07-31,extended-cache-ttl-2025-04-11"
+MAX_TOKENS = 8192
+
 # File handling settings
 MAX_FILE_SIZE_MB = 32
 SUPPORTED_DOCUMENTS = {'.pdf', '.docx', '.txt', '.md', '.rtf'}
@@ -85,15 +90,11 @@ FILES_DIR = f"{DATA_DIR}/files"
 TEMP_UPLOADS_DIR = f"{DATA_DIR}/temp_uploads"
 FILES_REGISTRY_FILE = f"{DATA_DIR}/files_registry.json"
 
-# Anthropic API settings
-ANTHROPIC_BETA_HEADER = "files-api-2025-04-14"
-MAX_TOKENS = 8192
-
 # UI settings
 DEFAULT_TIMEZONE = 'US/Eastern'
 
 # Commands
 AVAILABLE_COMMANDS = [
-    '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit', 
-    '/list', '/model', '/files', '/cleanup', '/copy'
+    '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit',
+    '/list', '/model', '/files', '/cleanup', '/copy', '/cache'
 ]

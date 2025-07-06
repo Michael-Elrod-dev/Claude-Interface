@@ -1,29 +1,34 @@
-"""
-Command handlers for Terminal Claude Chat.
-"""
+"""Command registry for Terminal Claude Chat."""
 
-from .base import BaseCommand
 from .chat_commands import (
     NewCommand, ClearCommand, QuitCommand, ExitCommand,
     HelpCommand, SaveCommand, LoadCommand, ListCommand
 )
 from .file_commands import FilesCommand
 from .system_commands import ModelCommand, CleanupCommand, CopyCommand
+from .cache_commands import CacheCommand
 
-# Command registry - maps command names to command classes
+# Command registry mapping command names to classes
 COMMAND_REGISTRY = {
-    "/help": HelpCommand,
-    "/new": NewCommand,
-    "/clear": ClearCommand,
-    "/quit": QuitCommand,
-    "/exit": ExitCommand,
-    "/save": SaveCommand,
-    "/load": LoadCommand,
-    "/list": ListCommand,
-    "/files": FilesCommand,
-    "/model": ModelCommand,
-    "/cleanup": CleanupCommand,
-    "/copy": CopyCommand,
+    '/new': NewCommand,
+    '/clear': ClearCommand,
+    '/quit': QuitCommand,
+    '/exit': ExitCommand,
+    '/help': HelpCommand,
+    '/save': SaveCommand,
+    '/load': LoadCommand,
+    '/list': ListCommand,
+    '/files': FilesCommand,
+    '/model': ModelCommand,
+    '/cleanup': CleanupCommand,
+    '/copy': CopyCommand,
+    '/cache': CacheCommand,
 }
 
-__all__ = ['BaseCommand', 'COMMAND_REGISTRY']
+__all__ = [
+    'COMMAND_REGISTRY',
+    'NewCommand', 'ClearCommand', 'QuitCommand', 'ExitCommand',
+    'HelpCommand', 'SaveCommand', 'LoadCommand', 'ListCommand',
+    'FilesCommand', 'ModelCommand', 'CleanupCommand', 'CopyCommand',
+    'CacheCommand'
+]

@@ -28,6 +28,10 @@ class NewCommand(BaseCommand):
                     self.app_context.conversation_manager.conversation
                 )
                 
+                # Clear cache when starting new conversation
+                if hasattr(self.app_context, 'cache_manager'):
+                    self.app_context.cache_manager.clear_cache()
+                
                 # Create new conversation
                 self.app_context.conversation_manager.create_new_conversation()
                 
@@ -36,6 +40,10 @@ class NewCommand(BaseCommand):
                 self.console.print(f"[dim]Using model: {model_display}[/dim]")
             return True
         else:
+            # Clear cache when starting new conversation
+            if hasattr(self.app_context, 'cache_manager'):
+                self.app_context.cache_manager.clear_cache()
+                
             self.app_context.conversation_manager.create_new_conversation()
             self.console.print("[green]✓[/green] Started new conversation")
             model_display = self.app_context.get_current_model_display()
@@ -149,11 +157,21 @@ class LoadCommand(BaseCommand):
                 conversation.current_model or self.app_context.get_current_model()
             )
             
+            # Load cache metadata if present
+            if hasattr(self.app_context, 'cache_manager') and conversation.cache_metadata:
+                self.app_context.cache_manager.from_dict(conversation.cache_metadata)
+            
             self.console.print(f"[green]✓[/green] Loaded conversation: {args}")
             
             # Show current model
             model_display = self.app_context.get_current_model_display()
             self.console.print(f"[dim]Using model: {model_display}[/dim]")
+            
+            # Show cache status if present
+            if hasattr(self.app_context, 'cache_manager'):
+                cache_info = self.app_context.cache_manager.get_cache_info()
+                if cache_info:
+                    self.console.print(f"[dim]Cache: {cache_info['cached_messages']} messages, status: {cache_info['status']}[/dim]")
         else:
             # Show available files
             conversations = self.app_context.storage.list_conversations()

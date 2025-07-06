@@ -1,6 +1,6 @@
 # Terminal Claude Chat 🤖
 
-A powerful command-line interface for chatting with Claude AI, featuring persistent file management, model switching, and beautiful markdown rendering.
+A powerful command-line interface for chatting with Claude AI, featuring persistent file management, model switching, prompt caching, and beautiful markdown rendering.
 
 ![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -10,69 +10,12 @@ A powerful command-line interface for chatting with Claude AI, featuring persist
 - 💬 **Interactive Chat** - Natural conversation with Claude AI directly from your terminal
 - 📎 **Files API Integration** - Upload files once and reference them throughout your conversation
 - 🔄 **Model Switching** - Seamlessly switch between Claude Sonnet and Opus models mid-conversation
+- ⏰ **Prompt Caching** - Cache conversation context for faster responses and reduced costs (5-minute or 1-hour duration)
 - 💾 **Persistent Storage** - Conversations and uploaded files persist across sessions
 - 📊 **Enhanced Document Processing** - Automatic text extraction from PDFs and image analysis
 - 🎨 **Beautiful Output** - Syntax highlighting and markdown rendering with Rich
 - ⚡ **Smart Commands** - Powerful command system for managing conversations and files
 - 🕐 **Conversation History** - Auto-save and resume conversations with full context
-
-## Installation
-
-### Prerequisites
-
-- Python 3.9 or higher
-- An Anthropic API key ([get one here](https://console.anthropic.com/))
-
-### Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/Claude-Interface.git
-cd Claude-Interface
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Create a `.env` file in the project root:
-```bash
-echo "ANTHROPIC_API_KEY=your-api-key-here" > .env
-```
-
-Replace `your-api-key-here` with your actual Anthropic API key.
-
-## Usage
-
-### Starting a Chat
-
-```bash
-python main.py
-```
-
-### Command Line Options
-
-```bash
-python main.py --help
-
-Options:
-  -c, --conversation FILE  Conversation file to load/save (default: conversation.json)
-  -n, --new               Start a new conversation
-  -e, --env FILE          Environment file to load (default: .env)
-```
-
-### Examples
-
-Start a new conversation:
-```bash
-python main.py --new
-```
-
-Load a specific conversation:
-```bash
-python main.py --conversation my_chat.json
-```
 
 ## Commands
 
@@ -84,6 +27,7 @@ python main.py --conversation my_chat.json
 | `/new` | Start a new conversation |
 | `/clear` | Clear the screen |
 | `/quit` or `/exit` | Exit the application |
+| `/copy` | Display last response without formatting for easy copying |
 
 ### Model Commands
 
@@ -92,6 +36,14 @@ python main.py --conversation my_chat.json
 | `/model` | Show current model |
 | `/model sonnet` | Switch to Claude Sonnet |
 | `/model opus` | Switch to Claude Opus |
+
+### Cache Commands
+
+| Command | Description |
+|---------|-------------|
+| `/cache` | Show current cache status and statistics |
+| `/cache 5` | Cache conversation context (5-minute expiration) |
+| `/cache 60` | Cache conversation context (1-hour expiration) |
 
 ### Files API Commands
 
@@ -115,6 +67,43 @@ python main.py --conversation my_chat.json
 | `/cleanup` | Clean up files and directories |
 
 ## Features in Detail
+
+### ⏰ Prompt Caching
+
+Reduce costs and improve response times by caching conversation context:
+
+```bash
+# After establishing your foundation context (tickets, code examples, etc.)
+You: /cache 5
+✓ Cache point created for 8 messages (valid for 5 minutes)
+Next API call will establish cache for conversation context
+
+# Or use 1-hour caching for longer sessions
+You: /cache 60
+✓ Cache point created for 8 messages (valid for 1 hour)
+
+# The prompt now shows time since last cache hit with color coding
+You (Sonnet 5m): continue with the implementation
+# Green (0-45m): Cache is active and fresh
+# Yellow (45-60m): Cache approaching expiration  
+# Red (60m+): Cache has expired
+
+# Re-cache at any time to update the cache boundary
+You: /cache 60
+Existing cache: 8 messages, 23m old (5 minutes)
+Creating new cache point...
+✓ Cache point created for 14 messages (valid for 1 hour)
+
+# View detailed cache information
+You: /cache
+Cache Information:
+  Status: active
+  Cached messages: 14
+  Time since hit: 5 minutes
+  Cache duration: 1 hour
+  Creation tokens: 4523
+  Last hit tokens: 4523
+```
 
 ### 📎 Files API Integration
 
@@ -152,15 +141,7 @@ Conversations are automatically saved and can be resumed:
 - Archives old conversations with timestamps
 - Keeps the 10 most recent conversations
 - Resume last conversation on startup
-
-### 📊 File Processing
-
-Supports various file types with intelligent processing:
-
-- **Images**: JPG, PNG, GIF, WebP, BMP (with metadata extraction)
-- **Documents**: PDF (with text extraction), TXT, MD, RTF
-- **Code**: All major programming languages with syntax highlighting
-- **Data**: JSON, XML, YAML, CSV
+- Cache state persists with conversations
 
 ## Project Structure
 
@@ -169,6 +150,9 @@ terminal-app/
 ├── main.py                   # Entry point
 ├── src/                      # Source code
 │   ├── app.py                # Main application
+│   ├── cache/                # Cache management
+│   │   ├── cache_manager.py  # Cache logic
+│   │   └── cache_models.py   # Cache data models
 │   ├── core/                 # Business logic
 │   ├── commands/             # Command handlers
 │   ├── storage/              # Data persistence
@@ -184,50 +168,3 @@ terminal-app/
 │   └── temp_uploads/         # Temporary uploads
 └── .env                      # API key configuration
 ```
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file with:
-
-```env
-ANTHROPIC_API_KEY=sk-ant-api03-...
-```
-
-### Settings
-
-Key settings can be found in `src/config/settings.py`:
-
-- `MAX_FILE_SIZE_MB`: Maximum file size (default: 32MB)
-- `MAX_SAVED_CONVERSATIONS`: Number of conversations to keep (default: 10)
-- `DEFAULT_TIMEZONE`: Timezone for timestamps (default: US/Eastern)
-
-## Tips and Tricks
-
-1. **Auto-include files**: Just mention a filename in your message to automatically include it
-2. **Quick model switch**: Use `/model s` or `/model o` as shortcuts
-3. **Conversation search**: Use `/load` without arguments to see all available conversations
-4. **File management**: Upload commonly used files once and reference them across sessions
-5. **Remote files**: Use `/files scp` to get the command for transferring files from remote servers
-
-## Requirements
-
-- Python
-- anthropic
-- rich
-- prompt-toolkit
-- python-dotenv
-- PyPDF2
-- Pillow
-- pytz
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgments
-
-- Built with [Anthropic's Claude API](https://www.anthropic.com/)
-- Terminal UI powered by [Rich](https://github.com/Textualize/rich)
-- Input handling by [prompt-toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit)

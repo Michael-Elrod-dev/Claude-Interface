@@ -58,6 +58,11 @@ Type your first message below!
 - `/cleanup` - Clean up files and directories (conversations, cache, etc.)
 - `/copy` - Display last response without formatting for easy copying
 
+**Cache Commands:**
+- `/cache` - Show current cache status and information
+- `/cache 1` - Cache conversation up to 1 message back
+- `/cache 5` - Cache conversation up to 5 messages back
+
 **Files API:**
 - `/files` - Show files commands
 - `/files list` - List all uploaded files
@@ -73,8 +78,14 @@ Type your first message below!
 **Features:**
 - 📎 **Files API**: Upload files once, reference them throughout the conversation
 - 🔄 **Model Switching**: Switch between models mid-conversation with context preserved
+- ⏰ **Prompt Caching**: Cache conversation context for faster responses (1-hour duration)
 - 💾 **Persistent Storage**: Conversations and uploaded files persist across sessions
 - 📋 **Copy-Friendly Output**: Use `/copy` to get clean text without formatting
+
+**Cache Status Indicators:**
+- Green timer (0-45m): Cache is active and fresh
+- Yellow timer (45-60m): Cache approaching expiration
+- Red timer (60m+): Cache has expired
 
 **Configuration:**
 - API key is loaded from `.env` file
@@ -84,6 +95,7 @@ Type your first message below!
 - Files uploaded via `/files add` persist across sessions
 - Mention a filename in your message to auto-include it
 - Use `/copy` after Claude responds with code to get clean, copyable text
+- Use `/cache` after establishing context to speed up subsequent messages
 """
         self.console.print(Markdown(help_text))
     

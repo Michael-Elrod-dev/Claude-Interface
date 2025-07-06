@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional, Union, List, Dict, Any
 from rich.console import Console
 
+from .cache import CacheManager
 from .config import EnvironmentConfig, DEFAULT_MODEL, DEFAULT_CONVERSATION_FILE
 from .core import ConversationManager
 from .core.chat_service import ChatService
@@ -40,6 +41,9 @@ class TerminalClaudeChat:
         # Initialize API-dependent components
         self.chat_service: Optional[ChatService] = None
         self.files_api_manager: Optional[FilesAPIManager] = None
+
+        # Initialize cache manager
+        self.cache_manager = CacheManager(self.console)
         
         if self.env_config.api_key:
             self.chat_service = ChatService(self.env_config.api_key, self.console)
@@ -76,6 +80,9 @@ class TerminalClaudeChat:
                 self.conversation_manager.get_current_model()
             )
             self.console.print(f"[dim]Using model: {model_display}[/dim]")
+        
+        if conversation and conversation.cache_metadata:
+            self.cache_manager.from_dict(conversation.cache_metadata)
     
     def check_api_key(self) -> bool:
         """Check if API key is available and valid"""
@@ -115,35 +122,48 @@ class TerminalClaudeChat:
         # Get messages for API
         api_messages = self.conversation_manager.get_api_messages()
         
-        # Send to Claude
-        response = self.chat_service.send_message(
+        # Send to Claude with cache manager
+        response_data = self.chat_service.send_message(
             api_messages,
             self.get_current_model(),
-            self.get_current_model_display()
+            self.get_current_model_display(),
+            self.cache_manager
         )
         
-        if response:
+        if response_data:
+            response_text = response_data["text"]
+            
             # Add assistant response
             self.conversation_manager.add_assistant_message(
-                response,
+                response_text,
                 self.get_current_model()
             )
             
+            # Update cache metadata in conversation
+            self.conversation_manager.conversation.cache_metadata = self.cache_manager.to_dict()
+            
             # Save conversation
             self.storage.save_conversation(self.conversation_manager.conversation)
+            
+            return response_text
         
-        return response
+        return None
     
     def process_user_input(self) -> Optional[bool]:
         """Process user input and return whether to continue"""
+        # Get cache status for display
+        cache_status, cache_color = self.cache_manager.get_cache_status_display()
+        
         # Build prompt
         prompt_text = self.input_handler.build_prompt_text(
             self.get_current_model_display(),
-            self.get_file_count()
+            self.get_file_count(),
+            cache_status,
+            cache_color
         )
         
-        # Get input
-        user_input = self.input_handler.get_user_input(prompt_text)
+        # Get input with cache status
+        user_input = self.input_handler.get_user_input(prompt_text, cache_status, cache_color)
         
         if user_input is None:
             return False
