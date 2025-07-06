@@ -32,8 +32,17 @@ class NewCommand(BaseCommand):
                 if hasattr(self.app_context, 'cache_manager'):
                     self.app_context.cache_manager.clear_cache()
                 
+                # Remember current web search state
+                web_search_was_enabled = False
+                if hasattr(self.app_context, 'web_search_manager'):
+                    web_search_was_enabled = self.app_context.web_search_manager.is_enabled()
+                
                 # Create new conversation
                 self.app_context.conversation_manager.create_new_conversation()
+                
+                # Restore web search state to new conversation
+                if web_search_was_enabled:
+                    self.app_context.conversation_manager.conversation.web_search_enabled = True
                 
                 self.console.print("[green]✓[/green] Started new conversation")
                 model_display = self.app_context.get_current_model_display()
@@ -161,6 +170,12 @@ class LoadCommand(BaseCommand):
             if hasattr(self.app_context, 'cache_manager') and conversation.cache_metadata:
                 self.app_context.cache_manager.from_dict(conversation.cache_metadata)
             
+            # Restore web search state
+            if hasattr(conversation, 'web_search_enabled') and conversation.web_search_enabled:
+                self.app_context.web_search_manager.enabled = True
+            else:
+                self.app_context.web_search_manager.enabled = False
+            
             self.console.print(f"[green]✓[/green] Loaded conversation: {args}")
             
             # Show current model
@@ -172,6 +187,12 @@ class LoadCommand(BaseCommand):
                 cache_info = self.app_context.cache_manager.get_cache_info()
                 if cache_info:
                     self.console.print(f"[dim]Cache: {cache_info['cached_messages']} messages, status: {cache_info['status']}[/dim]")
+            
+            # Show web search status
+            if hasattr(self.app_context, 'web_search_manager'):
+                web_enabled = self.app_context.web_search_manager.is_enabled()
+                if web_enabled:
+                    self.console.print("[dim]🌐 Web search: enabled[/dim]")
         else:
             # Show available files
             conversations = self.app_context.storage.list_conversations()

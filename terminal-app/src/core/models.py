@@ -56,6 +56,7 @@ class Conversation:
     created_at: Optional[str] = None
     current_model: Optional[str] = None
     cache_metadata: Optional[Dict[str, Any]] = None
+    web_search_enabled: bool = False
     
     def __post_init__(self):
         if self.created_at is None:
@@ -71,7 +72,8 @@ class Conversation:
         data = {
             "messages": [msg.to_dict() for msg in self.messages],
             "created_at": self.created_at,
-            "current_model": self.current_model
+            "current_model": self.current_model,
+            "web_search_enabled": self.web_search_enabled
         }
         if self.cache_metadata:
             data["cache_metadata"] = self.cache_metadata
@@ -85,7 +87,8 @@ class Conversation:
             messages=messages,
             created_at=data.get("created_at"),
             current_model=data.get("current_model"),
-            cache_metadata=data.get("cache_metadata")
+            cache_metadata=data.get("cache_metadata"),
+            web_search_enabled=data.get("web_search_enabled", False)
         )
     
     def get_api_messages(self) -> List[Dict[str, Any]]:

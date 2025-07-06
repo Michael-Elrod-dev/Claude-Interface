@@ -7,6 +7,7 @@ from .chat_commands import (
 from .file_commands import FilesCommand
 from .system_commands import ModelCommand, CleanupCommand, CopyCommand
 from .cache_commands import CacheCommand
+from .web_commands import WebCommand
 
 # Command registry mapping command names to classes
 COMMAND_REGISTRY = {
@@ -23,6 +24,7 @@ COMMAND_REGISTRY = {
     '/cleanup': CleanupCommand,
     '/copy': CopyCommand,
     '/cache': CacheCommand,
+    '/web': WebCommand,
 }
 
 __all__ = [
@@ -30,5 +32,5 @@ __all__ = [
     'NewCommand', 'ClearCommand', 'QuitCommand', 'ExitCommand',
     'HelpCommand', 'SaveCommand', 'LoadCommand', 'ListCommand',
     'FilesCommand', 'ModelCommand', 'CleanupCommand', 'CopyCommand',
-    'CacheCommand'
+    'CacheCommand', 'WebCommand'
 ]

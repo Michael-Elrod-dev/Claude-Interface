@@ -58,6 +58,11 @@ Type your first message below!
 - `/cleanup` - Clean up files and directories (conversations, cache, etc.)
 - `/copy` - Display last response without formatting for easy copying
 
+**Web Search:**
+- `/web` - Show web search status
+- `/web on` - Enable web search (up to 5 searches per message)
+- `/web off` - Disable web search
+
 **Cache Commands:**
 - `/cache` - Show current cache status and information
 - `/cache 1` - Cache conversation up to 1 message back
@@ -79,13 +84,20 @@ Type your first message below!
 - 📎 **Files API**: Upload files once, reference them throughout the conversation
 - 🔄 **Model Switching**: Switch between models mid-conversation with context preserved
 - ⏰ **Prompt Caching**: Cache conversation context for faster responses (1-hour duration)
+- 🌐 **Web Search**: Search the web for current information (up to 5 searches per message)
 - 💾 **Persistent Storage**: Conversations and uploaded files persist across sessions
-- 📋 **Copy-Friendly Output**: Use `/copy` to get clean text without formatting
+- 📊 **Enhanced Document Processing**: Automatic text extraction from PDFs and image analysis
+- 🎨 **Beautiful Output**: Syntax highlighting and markdown rendering with Rich
+- ⚡ **Smart Commands**: Powerful command system for managing conversations and files
+- 🕐 **Conversation History**: Auto-save and resume conversations with full context
 
-**Cache Status Indicators:**
-- Green timer (0-45m): Cache is active and fresh
-- Yellow timer (45-60m): Cache approaching expiration
-- Red timer (60m+): Cache has expired
+**Status Indicators:**
+- **S**: Sonnet model
+- **O**: Opus model  
+- 🌐: Web search enabled
+- ✅: Cache active
+- ❌: Cache expired
+- 📎N: Number of uploaded files
 
 **Configuration:**
 - API key is loaded from `.env` file
@@ -96,6 +108,7 @@ Type your first message below!
 - Mention a filename in your message to auto-include it
 - Use `/copy` after Claude responds with code to get clean, copyable text
 - Use `/cache` after establishing context to speed up subsequent messages
+- Use `/web on` to enable web search for current information
 """
         self.console.print(Markdown(help_text))
     
@@ -119,23 +132,6 @@ Type your first message below!
             title="API Key Warning",
             border_style="yellow"
         ))
-    
-    def display_response(self, response: str, model_name: Optional[str] = None):
-        """Display Claude's response with color dividers"""
-        # Create top divider with model name
-        divider_base = "─" * (self.console.size.width - 20)
-        model_text = f" {model_name} " if model_name else " Claude "
-        
-        self.console.print(f"[blue]┌─{model_text}{divider_base}[/blue]")
-        
-        # Display the markdown content without border
-        markdown_content = Markdown(response)
-        self.console.print(markdown_content)
-        
-        # Create bottom divider
-        full_divider = "─" * (self.console.size.width - 4)
-        self.console.print(f"[blue]└{full_divider}─[/blue]")
-        self.console.print()
     
     def display_user_message(self, content_text: str):
         """Display user message in a panel"""
@@ -201,6 +197,23 @@ Type your first message below!
         
         if messages:
             self.console.print("[dim]─── End of recent messages ───[/dim]\n")
+    
+    def display_response(self, response: str, model_name: Optional[str] = None):
+        """Display Claude's response with color dividers (for conversation history)"""
+        # Create top divider with model name
+        divider_base = "─" * (self.console.size.width - 20)
+        model_text = f" {model_name} " if model_name else " Claude "
+        
+        self.console.print(f"[blue]┌─{model_text}{divider_base}[/blue]")
+        
+        # Display the markdown content without border
+        markdown_content = Markdown(response)
+        self.console.print(markdown_content)
+        
+        # Create bottom divider
+        full_divider = "─" * (self.console.size.width - 4)
+        self.console.print(f"[blue]└{full_divider}─[/blue]")
+        self.console.print()
     
     def print(self, *args, **kwargs):
         """Direct print passthrough"""

@@ -103,7 +103,7 @@ class CacheManager:
         """Get cache status for display in prompt
 
         Returns:
-            Tuple of (status_text, color_style) - now returns simple indicators for checkmark logic
+            Tuple of (status_text, color_style) for emoji selection
         """
         if not self.cache_metadata:
             return "", ""
@@ -114,11 +114,11 @@ class CacheManager:
 
         duration = self.cache_metadata.duration_minutes
 
-        # Return simple status for checkmark determination
+        # Return status for emoji determination
         if minutes >= duration:
-            return "expired", "red"  # Will trigger ✗
+            return "expired", "red"  # Will trigger ❌
         else:
-            return "active", "green"  # Will trigger ✓
+            return "active", "green"  # Will trigger ✅
 
     def has_active_cache(self) -> bool:
         """Check if there's an active cache"""

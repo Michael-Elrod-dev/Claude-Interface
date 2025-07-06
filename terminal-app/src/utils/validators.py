@@ -61,12 +61,14 @@ class ModelUtils:
         return model_map.get(model_id, model_id)
     
     @staticmethod
-    def get_model_key_from_id(model_id: str) -> Optional[str]:
-        """Get the model key from model ID"""
-        for key, mid in AVAILABLE_MODELS.items():
-            if mid == model_id:
-                return key
-        return None
+    def get_model_letter(model_id: str) -> str:
+        """Get letter for model type"""
+        if 'sonnet' in model_id.lower():
+            return 'S'
+        elif 'opus' in model_id.lower():
+            return 'O'
+        else:
+            return '?'
 
 
 class FileUtils:

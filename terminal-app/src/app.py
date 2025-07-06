@@ -13,6 +13,7 @@ from .core.chat_service import ChatService
 from .storage import ConversationStore
 from .files import FileHandler, FilesAPIManager
 from .ui import DisplayManager, InputHandler
+from .web import WebSearchManager
 from .utils import ModelUtils, Validators
 from .commands import COMMAND_REGISTRY
 
@@ -44,6 +45,9 @@ class TerminalClaudeChat:
 
         # Initialize cache manager
         self.cache_manager = CacheManager(self.console)
+
+        # Initialize web search manager
+        self.web_search_manager = WebSearchManager(self.console)
         
         if self.env_config.api_key:
             self.chat_service = ChatService(self.env_config.api_key, self.console)
@@ -74,6 +78,10 @@ class TerminalClaudeChat:
             self.conversation_manager.set_current_model(
                 conversation.current_model or DEFAULT_MODEL
             )
+            
+            # Restore web search state if it was saved
+            if hasattr(conversation, 'web_search_enabled') and conversation.web_search_enabled:
+                self.web_search_manager.enabled = True
             
             # Show current model
             model_display = ModelUtils.get_model_display_name(
@@ -122,12 +130,21 @@ class TerminalClaudeChat:
         # Get messages for API
         api_messages = self.conversation_manager.get_api_messages()
         
-        # Send to Claude with cache manager
+        # Prepare tools list
+        tools = []
+        
+        # Add web search tool if enabled
+        web_tool = self.web_search_manager.get_tool_definition()
+        if web_tool:
+            tools.append(web_tool)
+        
+        # Send to Claude with cache manager and tools
         response_data = self.chat_service.send_message(
             api_messages,
             self.get_current_model(),
             self.get_current_model_display(),
-            self.cache_manager
+            self.cache_manager,
+            tools
         )
         
         if response_data:
@@ -139,8 +156,9 @@ class TerminalClaudeChat:
                 self.get_current_model()
             )
             
-            # Update cache metadata in conversation
+            # Update conversation metadata (cache AND web search state)
             self.conversation_manager.conversation.cache_metadata = self.cache_manager.to_dict()
+            self.conversation_manager.conversation.web_search_enabled = self.web_search_manager.is_enabled()  # Add this
             
             # Save conversation
             self.storage.save_conversation(self.conversation_manager.conversation)
@@ -154,16 +172,26 @@ class TerminalClaudeChat:
         # Get cache status for display
         cache_status, cache_color = self.cache_manager.get_cache_status_display()
         
+        # Get web search status for display
+        web_status, web_color = self.web_search_manager.get_status_display()
+        
+        # Get model display name
+        model_display = self.get_current_model_display()
+        
         # Build prompt
         prompt_text = self.input_handler.build_prompt_text(
-            self.get_current_model_display(),
+            model_display,
             self.get_file_count(),
             cache_status,
-            cache_color
+            cache_color,
+            web_status,
+            web_color
         )
         
-        # Get input with cache status
-        user_input = self.input_handler.get_user_input(prompt_text, cache_status, cache_color)
+        # Get input with status parameters including model_display
+        user_input = self.input_handler.get_user_input(
+            prompt_text, cache_status, cache_color, web_status, web_color, model_display
+        )
         
         if user_input is None:
             return False
@@ -204,7 +232,7 @@ class TerminalClaudeChat:
         response = self.send_message_to_claude(message_content)
         
         if response:
-            self.display.display_response(response, self.get_current_model_display())
+            pass
         else:
             self.console.print("[red]Failed to get response from Claude[/red]")
         
@@ -224,6 +252,10 @@ class TerminalClaudeChat:
             file_count = self.get_file_count()
             if file_count > 0:
                 self.console.print(f"[dim]📎 {file_count} file(s) uploaded to Files API[/dim]")
+            
+            # Show web search status if enabled
+            if self.web_search_manager.is_enabled():
+                self.console.print("[dim]🌐 Web search enabled[/dim]")
             
             # Show conversation history if any
             if self.conversation_manager.has_messages():

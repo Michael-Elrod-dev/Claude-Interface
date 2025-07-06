@@ -33,19 +33,19 @@ class InputHandler:
             """Handle Ctrl+C gracefully"""
             event.app.exit(exception=KeyboardInterrupt)
     
-    def get_user_input(self, prompt_text: str, cache_status: str = "", cache_color: str = "") -> Optional[str]:
+    def get_user_input(self, prompt_text: str, cache_status: str = "", cache_color: str = "", 
+                    web_status: str = "", web_color: str = "", model_display: str = "Claude") -> Optional[str]:
         """Get user input with history and completion"""
         try:
-            # Extract model name and file count from prompt_text
+            # Extract file count from prompt_text
             import re
-            model_match = re.search(r'You \((\w+)', prompt_text)
-            model_display = model_match.group(1) if model_match else "Claude"
-            
             file_match = re.search(r'📎(\d+)', prompt_text)
             file_count = int(file_match.group(1)) if file_match else 0
             
-            # Use styled prompt with cache status
-            styled_prompt = self._get_styled_prompt_with_cache(model_display, file_count, cache_status, cache_color)
+            # Use styled prompt with the passed parameters
+            styled_prompt = self._get_styled_prompt_with_status(
+                model_display, file_count, cache_status, cache_color, web_status, web_color
+            )
             
             user_input = prompt(
                 styled_prompt,
@@ -65,11 +65,7 @@ class InputHandler:
             return None
     
     def parse_command(self, user_input: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        """Parse user input for commands
-        
-        Returns:
-            (command, args, original_input) or (None, None, user_input) if not a command
-        """
+        """Parse user input for commands"""
         if not user_input or not user_input.startswith('/'):
             return None, None, user_input
         
@@ -80,55 +76,65 @@ class InputHandler:
         return command, args, user_input
     
     def build_prompt_text(self, model_display: str, file_count: int = 0, 
-                        cache_status: str = "", cache_color: str = "") -> str:
+                        cache_status: str = "", cache_color: str = "",
+                        web_status: str = "", web_color: str = "") -> str:
         """Build the prompt text with status indicators"""
-        status_parts = [model_display]
+        status_parts = []
         
-        # Add cache status icon if provided
-        if cache_status == "expired":
-            status_parts[0] = f"{model_display} ✗"
-        elif cache_status == "active":
-            status_parts[0] = f"{model_display} ✓"
+        # Add model letter (S or O)
+        if "Sonnet" in model_display:
+            status_parts.append("S")
+        elif "Opus" in model_display:
+            status_parts.append("O")
         
+        # Add web search emoji if enabled
+        if web_status == "web":
+            status_parts.append("🌐")
+        
+        # Add cache emoji based on status
+        if cache_status == "active":
+            status_parts.append("✅")
+        elif cache_status == "expired":
+            status_parts.append("❌")
+        
+        # Add file count if any
         if file_count > 0:
             status_parts.append(f"📎{file_count}")
         
-        return f"You ({' '.join(status_parts)}): "
-    
-    def _get_styled_prompt_with_cache(self, model_display: str, file_count: int = 0, 
-                                    cache_status: str = "", cache_color: str = "") -> List:
-        """Build formatted prompt with cache status indicators"""
-        prompt_parts = []
-        
-        # Add cache status icon based on status
-        if cache_status == "active":
-            cache_style = "fg:green"
-            cache_icon = " ✓"
-            prompt_parts = [
-                ("", "You ("),
-                ("", model_display),
-                (cache_style, cache_icon),
-                ("", ")")
-            ]
-        elif cache_status == "expired":
-            cache_style = "fg:red"
-            cache_icon = " ✗"
-            prompt_parts = [
-                ("", "You ("),
-                ("", model_display),
-                (cache_style, cache_icon),
-                ("", ")")
-            ]
+        # Join all status parts with no spaces
+        if status_parts:
+            status_text = "".join(status_parts)
+            return f"You ({status_text}): "
         else:
-            # No cache
-            prompt_parts = [
-                ("", f"You ({model_display})")
-            ]
+            return "You: "
+
+    def _get_styled_prompt_with_status(self, model_display: str, file_count: int = 0, 
+                                    cache_status: str = "", cache_color: str = "",
+                                    web_status: str = "", web_color: str = "") -> List:
+        """Build formatted prompt with status indicators"""
+        prompt_parts = [("", "You (")]
         
-        # Add file indicator
+        # Add model letter (bold S or O)
+        if "Sonnet" in model_display:
+            prompt_parts.append(("bold", "S"))
+        elif "Opus" in model_display:
+            prompt_parts.append(("bold", "O"))
+        
+        # Add web search emoji if enabled
+        if web_status == "web":
+            prompt_parts.append(("fg:cyan", "🌐"))
+        
+        # Add cache emoji based on status
+        if cache_status == "active":
+            prompt_parts.append(("fg:green", "✅"))
+        elif cache_status == "expired":
+            prompt_parts.append(("fg:red", "❌"))
+        
+        # Add file count if any
         if file_count > 0:
-            prompt_parts.append(("", f" 📎{file_count}"))
+            prompt_parts.append(("fg:yellow", f"📎{file_count}"))
         
-        prompt_parts.append(("", ": "))
+        # Close parenthesis and add colon
+        prompt_parts.append(("", "): "))
         
         return prompt_parts

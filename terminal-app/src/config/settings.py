@@ -21,6 +21,11 @@ MAX_FILE_SIZE_MB = 32
 SUPPORTED_DOCUMENTS = {'.pdf', '.docx', '.txt', '.md', '.rtf'}
 SUPPORTED_IMAGES = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
 
+# Web search settings
+WEB_SEARCH_MAX_USES = 5
+WEB_SEARCH_TOOL_NAME = "web_search"
+WEB_SEARCH_TOOL_TYPE = "web_search_20250305"
+
 # Text file extensions for Files API
 TEXT_EXTENSIONS = {
     # Code files
@@ -96,5 +101,5 @@ DEFAULT_TIMEZONE = 'US/Eastern'
 # Commands
 AVAILABLE_COMMANDS = [
     '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit',
-    '/list', '/model', '/files', '/cleanup', '/copy', '/cache'
+    '/list', '/model', '/files', '/cleanup', '/copy', '/cache', '/web'
 ]
