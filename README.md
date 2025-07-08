@@ -1,6 +1,6 @@
 # Terminal Claude Chat 🤖
 
-A powerful command-line interface for chatting with Claude AI, featuring persistent file management, model switching, prompt caching, web search, and beautiful markdown rendering with real-time streaming.
+A powerful command-line interface for chatting with Claude AI, featuring persistent file management, model switching, prompt caching, web search, and beautiful markdown rendering with optional real-time streaming.
 
 ![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -8,7 +8,7 @@ A powerful command-line interface for chatting with Claude AI, featuring persist
 ## Features
 
 - 💬 **Interactive Chat** - Natural conversation with Claude AI directly from your terminal
-- 🌊 **Real-time Streaming** - See Claude's responses appear as they're generated, just like the official website
+- 🌊 **Real-time Streaming** - See Claude's responses appear as they're generated, just like the official website (optional)
 - 🌐 **Web Search Integration** - Enable web search for current information (up to 5 searches per message)
 - 📎 **Files API Integration** - Upload files once and reference them throughout your conversation
 - 🔄 **Model Switching** - Seamlessly switch between Claude Sonnet and Opus models mid-conversation
@@ -26,7 +26,7 @@ A powerful command-line interface for chatting with Claude AI, featuring persist
 | Command | Description |
 |---------|-------------|
 | `/help` | Show help information |
-| `/new` | Start a new conversation |
+| `/new [filename]` | Start a new conversation, optionally archive current with custom name |
 | `/clear` | Clear the screen |
 | `/quit` or `/exit` | Exit the application |
 | `/copy` | Display last response without formatting for easy copying |
@@ -78,9 +78,9 @@ A powerful command-line interface for chatting with Claude AI, featuring persist
 
 ## Features in Detail
 
-### 🌊 Real-time Streaming
+### 🌊 Real-time Streaming (Optional)
 
-All Claude responses now stream in real-time as they're generated:
+Claude responses can stream in real-time as they're generated, or display all at once with a progress indicator:
 
 ```bash
 You (S): Explain quantum computing
@@ -89,6 +89,10 @@ Quantum computing is a revolutionary approach to computation...
 # [Text appears as Claude generates it, with web search updates if enabled]
 └───────────────────────────────────────────────────────────────
 ```
+
+**Streaming Configuration:**
+- Set `ENABLE_STREAMING = True` in `config/settings.py` for real-time streaming
+- Set `ENABLE_STREAMING = False` for progress indicator with complete formatted response
 
 ### 🌐 Web Search Integration
 
@@ -186,10 +190,25 @@ You: /model opus
 Conversations are automatically saved and can be resumed:
 
 - Auto-saves after each message
-- Archives old conversations with timestamps
+- Archives old conversations with timestamps or custom names
 - Keeps the 10 most recent conversations
 - Resume last conversation on startup
 - Cache and web search state persist with conversations
+
+**Custom Archive Names:**
+```bash
+# Archive with custom name
+You: /new ticket968
+Start a new conversation? Current conversation will be archived as 'ticket968.json'.
+✓ Started new conversation
+Previous conversation archived as: ticket968.json
+
+# Archive with default timestamp
+You: /new
+Start a new conversation? Current conversation will be archived.
+✓ Started new conversation
+Previous conversation archived as: 2025-01-07_02-15PM.json
+```
 
 ## Status Indicators
 
@@ -264,6 +283,18 @@ terminal-app/
 
 ## Advanced Usage
 
+### Streaming Configuration
+
+Configure response display mode in `config/settings.py`:
+
+```python
+# Real-time streaming (default)
+ENABLE_STREAMING = True
+
+# Progress indicator with complete response
+ENABLE_STREAMING = False
+```
+
 ### Web Search Best Practices
 
 - **Enable selectively**: Use `/web on` when you need current information
@@ -285,6 +316,12 @@ terminal-app/
 - **Batch processing**: Upload multiple files with `/files add`
 - **Organization**: Use descriptive filenames for easy reference
 
+### Conversation Organization
+
+- **Custom archive names**: Use `/new projectname` to archive with meaningful names
+- **Default timestamps**: Use `/new` for automatic timestamp-based archiving
+- **Load by name**: Use `/load projectname` to resume specific conversations
+
 ## Configuration
 
 - **API key**: Set `ANTHROPIC_API_KEY` in your `.env` file
@@ -292,6 +329,7 @@ terminal-app/
 - **Conversation limit**: Keeps 10 most recent conversations
 - **File size limit**: 32MB maximum per file
 - **Web search limit**: 5 searches per message maximum
+- **Streaming**: Configure `ENABLE_STREAMING` in `config/settings.py`
 
 ## Usage Tips
 
@@ -302,6 +340,8 @@ terminal-app/
 - Use `/web on` to enable web search for current information
 - Web search and cache states are saved with each conversation
 - Use `/cleanup` to reset everything and start fresh
+- Use `/new projectname` to organize conversations with meaningful names
+- Toggle `ENABLE_STREAMING` to choose between real-time or complete responses
 
 ## Requirements
 
