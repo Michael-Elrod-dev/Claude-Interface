@@ -18,15 +18,35 @@ class NewCommand(BaseCommand):
     
     @property
     def description(self) -> str:
-        return "Start a new conversation"
+        return "Start a new conversation (/new [filename])"
     
     def execute(self, args: Optional[str] = None) -> bool:
         if self.app_context.conversation_manager.has_messages():
-            if confirm("Start a new conversation? Current conversation will be archived."):
-                # Archive current conversation
-                self.app_context.storage.archive_conversation(
-                    self.app_context.conversation_manager.conversation
-                )
+            # Parse the filename if provided
+            custom_filename = None
+            if args and args.strip():
+                custom_filename = args.strip()
+                # Add .json extension if not present
+                if not custom_filename.endswith('.json'):
+                    custom_filename += '.json'
+            
+            # Show confirmation message with filename info
+            if custom_filename:
+                confirm_msg = f"Start a new conversation? Current conversation will be archived as '{custom_filename}'."
+            else:
+                confirm_msg = "Start a new conversation? Current conversation will be archived."
+            
+            if confirm(confirm_msg):
+                # Archive current conversation with custom or default name
+                if custom_filename:
+                    archived_name = self.app_context.storage.archive_conversation_with_name(
+                        self.app_context.conversation_manager.conversation,
+                        custom_filename
+                    )
+                else:
+                    archived_name = self.app_context.storage.archive_conversation(
+                        self.app_context.conversation_manager.conversation
+                    )
                 
                 # Clear cache when starting new conversation
                 if hasattr(self.app_context, 'cache_manager'):
@@ -45,10 +65,13 @@ class NewCommand(BaseCommand):
                     self.app_context.conversation_manager.conversation.web_search_enabled = True
                 
                 self.console.print("[green]✓[/green] Started new conversation")
+                if archived_name:
+                    self.console.print(f"[dim]Previous conversation archived as: {archived_name}[/dim]")
                 model_display = self.app_context.get_current_model_display()
                 self.console.print(f"[dim]Using model: {model_display}[/dim]")
             return True
         else:
+            # No messages to archive, just start new
             # Clear cache when starting new conversation
             if hasattr(self.app_context, 'cache_manager'):
                 self.app_context.cache_manager.clear_cache()

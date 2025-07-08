@@ -98,6 +98,9 @@ FILES_REGISTRY_FILE = f"{DATA_DIR}/files_registry.json"
 # UI settings
 DEFAULT_TIMEZONE = 'US/Eastern'
 
+# Streaming settings
+ENABLE_STREAMING = False
+
 # Commands
 AVAILABLE_COMMANDS = [
     '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit',

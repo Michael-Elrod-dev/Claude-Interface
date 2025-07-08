@@ -89,6 +89,37 @@ class ConversationStore:
             self.console.print(f"[red]Error archiving conversation: {e}[/red]")
             return None
     
+    def archive_conversation_with_name(self, conversation: Conversation, filename: str) -> Optional[str]:
+        """Archive current conversation with a custom filename"""
+        if not conversation.messages:
+            return None
+        
+        # Ensure filename ends with .json
+        if not filename.endswith('.json'):
+            filename += '.json'
+        
+        archive_path = self.conversations_dir / filename
+        
+        try:
+            # Check if file already exists
+            if archive_path.exists():
+                self.console.print(f"[yellow]Warning: File '{filename}' already exists, overwriting...[/yellow]")
+            
+            # Save conversation to archive with custom name
+            with open(archive_path, 'w', encoding='utf-8') as f:
+                json.dump(conversation.to_dict(), f, indent=2, ensure_ascii=False)
+            
+            self.console.print(f"[green]✓[/green] Archived conversation to {filename}")
+            
+            # Clean up old conversations (but don't delete the one we just created)
+            self.cleanup_old_conversations_except(filename)
+            
+            return filename
+            
+        except Exception as e:
+            self.console.print(f"[red]Error archiving conversation: {e}[/red]")
+            return None
+    
     def cleanup_old_conversations(self):
         """Keep only the most recent conversation files"""
         try:
@@ -101,6 +132,30 @@ class ConversationStore:
             
             # Delete files beyond the limit
             for old_file in conversation_files[MAX_SAVED_CONVERSATIONS:]:
+                os.remove(old_file)
+                filename = Path(old_file).name
+                self.console.print(f"[dim]Deleted old conversation: {filename}[/dim]")
+                
+        except Exception as e:
+            self.console.print(f"[red]Error cleaning up old conversations: {e}[/red]")
+    
+    def cleanup_old_conversations_except(self, keep_filename: str):
+        """Keep only the most recent conversation files, but always keep the specified file"""
+        try:
+            # Get all conversation files
+            pattern = str(self.conversations_dir / "*.json")
+            conversation_files = glob.glob(pattern)
+            
+            # Sort by modification time (newest first)
+            conversation_files.sort(key=os.path.getmtime, reverse=True)
+            
+            # Remove the file we want to keep from the list
+            keep_path = str(self.conversations_dir / keep_filename)
+            if keep_path in conversation_files:
+                conversation_files.remove(keep_path)
+            
+            # Delete files beyond the limit
+            for old_file in conversation_files[MAX_SAVED_CONVERSATIONS-1:]:  # -1 because we're keeping one extra
                 os.remove(old_file)
                 filename = Path(old_file).name
                 self.console.print(f"[dim]Deleted old conversation: {filename}[/dim]")
