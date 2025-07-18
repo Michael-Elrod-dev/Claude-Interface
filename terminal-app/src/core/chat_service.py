@@ -26,7 +26,7 @@ class ChatService:
         
         try:
             # Prepare messages with cache control if cache manager provided
-            if cache_manager and cache_manager.has_active_cache():
+            if cache_manager and cache_manager.cache_metadata:
                 messages = cache_manager.prepare_messages_with_cache(messages)
             
             # Create message params

@@ -22,17 +22,17 @@ class CacheManager:
 
         # Find the last message to cache up to (always the current end)
         cache_index = len(conversation.messages) - 1
-
-        # Count messages to be cached
         messages_to_cache = cache_index + 1
 
-        # Create or update cache metadata
+        # Create cache metadata (cache not yet created in API)
         self.cache_metadata = CacheMetadata(
             cache_point_index=cache_index,
             created_at=datetime.now(),
             total_cached_messages=messages_to_cache,
-            last_hit_at=datetime.now(),  # Set this so status is ACTIVE immediately
-            duration_minutes=duration_minutes
+            last_hit_at=None,  # Will be set when cache is actually created
+            duration_minutes=duration_minutes,
+            cache_creation_tokens=0,  # Will be set when cache is created
+            cache_hit_tokens=0
         )
 
         duration_text = "1 hour" if duration_minutes == 60 else f"{duration_minutes} minutes"
@@ -45,8 +45,12 @@ class CacheManager:
         """Prepare messages with cache control for API request"""
         if not self.cache_metadata or not messages:
             return messages
-
-        # Clone messages to avoid modifying originals
+        
+        # Check if cache was already created
+        if self.cache_metadata.cache_creation_tokens > 0:
+            return messages
+        
+        # Cache not yet created - add cache control to create it
         prepared_messages = []
         cache_point_index = self.cache_metadata.cache_point_index
         ttl = "1h" if self.cache_metadata.duration_minutes == 60 else "5m"
@@ -54,11 +58,10 @@ class CacheManager:
         for i, msg in enumerate(messages):
             msg_copy = msg.copy()
 
-            # Only add cache control to the LAST message in the cache range
-            # This caches everything up to that point as ONE block
+            # Only add cache control if we haven't created the cache yet
+            # AND this is the cache boundary message
             if i == cache_point_index:
                 if isinstance(msg_copy.get("content"), str):
-                    # Convert string content to array format
                     msg_copy["content"] = [
                         {
                             "type": "text",
@@ -67,9 +70,7 @@ class CacheManager:
                         }
                     ]
                 elif isinstance(msg_copy.get("content"), list):
-                    # Content is already in array format, add cache_control to the last block only
-                    if msg_copy["content"]:  # Make sure content list is not empty
-                        # Add cache_control only to the last content block
+                    if msg_copy["content"]:
                         last_block = msg_copy["content"][-1]
                         if last_block.get("type") in ["text", "image", "document"]:
                             last_block["cache_control"] = {"type": "ephemeral", "ttl": ttl}
@@ -88,16 +89,18 @@ class CacheManager:
         # Check for cache creation
         cache_creation_tokens = usage.get("cache_creation_input_tokens", 0)
         if cache_creation_tokens > 0:
-            self.cache_metadata.cache_creation_tokens = cache_creation_tokens
-            self.cache_metadata.last_hit_at = datetime.now()
-            self.console.print(f"[green]✓[/green] Cache created: {cache_creation_tokens} tokens")
+            # Show message if this is the first time creating cache
+            if self.cache_metadata.cache_creation_tokens == 0:
+                self.cache_metadata.cache_creation_tokens = cache_creation_tokens
+                self.cache_metadata.last_hit_at = datetime.now()
+                self.console.print(f"[green]✓[/green] Cache established: {cache_creation_tokens} tokens")
 
         # Check for cache hits
         cache_read_tokens = usage.get("cache_read_input_tokens", 0)
         if cache_read_tokens > 0:
             self.cache_metadata.cache_hit_tokens = cache_read_tokens
             self.cache_metadata.last_hit_at = datetime.now()
-            # Don't print on every hit to avoid clutter
+            self.console.print(f"[dim]Cache hit: {cache_read_tokens} tokens[/dim]")
 
     def get_cache_status_display(self) -> Tuple[str, str]:
         """Get cache status for display in prompt

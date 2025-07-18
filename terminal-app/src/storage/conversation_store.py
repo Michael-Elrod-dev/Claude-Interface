@@ -69,7 +69,7 @@ class ConversationStore:
         # Generate human-readable timestamp filename
         eastern = pytz.timezone(DEFAULT_TIMEZONE)
         now = datetime.now(eastern)
-        timestamp = now.strftime("%Y-%m-%d_%I-%M%p")
+        timestamp = now.strftime("%m-%d-%H%p")
         archive_filename = f"{timestamp}.json"
         archive_path = self.conversations_dir / archive_filename
         
