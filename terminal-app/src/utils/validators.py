@@ -55,8 +55,8 @@ class ModelUtils:
     def get_model_display_name(model_id: str) -> str:
         """Get a friendly display name for a model"""
         model_map = {
-            'claude-sonnet-4-20250514': 'Sonnet',
-            'claude-opus-4-20250514': 'Opus'
+            'claude-sonnet-4-5-20250929': 'Sonnet',
+            'claude-opus-4-1-20250805': 'Opus'
         }
         return model_map.get(model_id, model_id)
     

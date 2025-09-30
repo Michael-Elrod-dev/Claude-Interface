@@ -178,8 +178,8 @@ Switch between models while maintaining conversation context:
 You: /model
 Current model: Sonnet
 Available models:
-  - sonnet: claude-sonnet-4-20250514
-  - opus: claude-opus-4-20250514
+  - sonnet: claude-sonnet-4-5-20250929
+  - opus: claude-opus-4-1-20250805
 
 You: /model opus
 ✓ Switched from Sonnet to Opus

@@ -442,7 +442,7 @@ APP_SECRET_KEY=your-secret-key-here
         }
 
         api_data = {
-            'model': 'claude-sonnet-4-20250514',
+            'model': 'claude-sonnet-4-5-20250929',
             'max_tokens': 10000,
             'messages': self.conversation["messages"]
         }
