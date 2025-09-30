@@ -87,7 +87,7 @@ NO_EXTENSION_TEXT_FILES = {
 
 # Storage settings
 DATA_DIR = "data"
-MAX_SAVED_CONVERSATIONS = 20
+MAX_SAVED_CONVERSATIONS = 30
 CONVERSATIONS_DIR = f"{DATA_DIR}/conversations"
 DEFAULT_CONVERSATION_FILE = f"{DATA_DIR}/conversation.json"
 HISTORY_FILE = f"{DATA_DIR}/chat_history.txt"
