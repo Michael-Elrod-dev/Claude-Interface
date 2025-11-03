@@ -56,7 +56,11 @@ Type your first message below!
 - `/quit` or `/exit` - Exit the application
 - `/model [sonnet|opus]` - Switch models or show current model
 - `/cleanup` - Clean up files and directories (conversations, cache, etc.)
-- `/copy` - Display last response without formatting for easy copying
+- `/copy [N|on|off]` - Display response without formatting for easy copying
+  - `/copy` - Copy last response
+  - `/copy 3` - Copy response from 3 messages back
+  - `/copy on` - Auto-display copy format for all responses
+  - `/copy off` - Disable auto-copy mode
 
 **Web Search:**
 - `/web` - Show web search status

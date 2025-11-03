@@ -187,52 +187,108 @@ class CleanupCommand(BaseCommand):
 
 
 class CopyCommand(BaseCommand):
-    """Display last assistant response without formatting for easy copying"""
-    
+    """Display assistant responses without formatting for easy copying"""
+
+    def __init__(self, console, app_context=None):
+        super().__init__(console, app_context)
+        self.auto_copy_enabled = False  # Track auto-copy state
+
     @property
     def name(self) -> str:
         return "/copy"
-    
+
     @property
     def description(self) -> str:
-        return "Display last response without formatting for easy copying"
-    
+        return "Display response(s) without formatting for easy copying"
+
     def execute(self, args: Optional[str] = None) -> bool:
+        if not args:
+            # Default behavior - copy last message
+            return self._copy_message(0)
+
+        args_lower = args.strip().lower()
+
+        # Check for on/off toggle
+        if args_lower in ['on', 'enable', 'true']:
+            self.auto_copy_enabled = True
+            self.console.print(
+                "[green]✓[/green] Auto-copy enabled - all future responses will display copy-friendly format")
+            return True
+        elif args_lower in ['off', 'disable', 'false']:
+            self.auto_copy_enabled = False
+            self.console.print("[yellow]Auto-copy disabled[/yellow]")
+            return True
+
+        # Try to parse as a number (messages back)
+        try:
+            messages_back = int(args.strip())
+            if messages_back < 0:
+                self.console.print("[red]Error: Number must be 0 or greater[/red]")
+                return True
+            return self._copy_message(messages_back)
+        except ValueError:
+            self.console.print(f"[red]Invalid argument: {args}[/red]")
+            self.console.print("[yellow]Usage: /copy [N] or /copy [on|off][/yellow]")
+            self.console.print("  /copy     - Copy last response")
+            self.console.print("  /copy 2   - Copy response from 2 messages back")
+            self.console.print("  /copy on  - Enable auto-copy for all responses")
+            self.console.print("  /copy off - Disable auto-copy")
+            return True
+
+    def _copy_message(self, messages_back: int) -> bool:
+        """Copy a specific message from history"""
         if not self.app_context.conversation_manager.has_messages():
             self.console.print("[yellow]No messages to copy[/yellow]")
             return True
-        
-        # Get the last assistant message
+
+        # Get all assistant messages
         messages = self.app_context.conversation_manager.conversation.messages
-        last_assistant_message = None
-        
-        # Find the most recent assistant message
-        for message in reversed(messages):
-            if message.role == "assistant":
-                last_assistant_message = message
-                break
-        
-        if not last_assistant_message:
-            self.console.print("[yellow]No assistant response found to copy[/yellow]")
+        assistant_messages = [msg for msg in messages if msg.role == "assistant"]
+
+        if not assistant_messages:
+            self.console.print("[yellow]No assistant responses found to copy[/yellow]")
             return True
-        
-        # Display the raw content without any formatting
-        self.console.print("\n" + "="*60)
-        self.console.print("RAW CONTENT (copy-friendly):")
-        self.console.print("="*60)
-        
+
+        # Check if messages_back is valid
+        if messages_back >= len(assistant_messages):
+            self.console.print(f"[red]Error: Only {len(assistant_messages)} assistant message(s) in history[/red]")
+            self.console.print(f"[yellow]Try a number between 0 and {len(assistant_messages) - 1}[/yellow]")
+            return True
+
+        # Get the target message (counting from the end)
+        target_message = assistant_messages[-(messages_back + 1)]
+
+        # Display the raw content
+        self._display_raw_content(target_message.content, messages_back)
+
+        return True
+
+    def _display_raw_content(self, content, messages_back: int = 0):
+        """Display raw content without Rich formatting"""
+        position_text = "current" if messages_back == 0 else f"{messages_back} message(s) back"
+
+        self.console.print("\n" + "=" * 60)
+        self.console.print(f"RAW CONTENT ({position_text}) - copy-friendly:")
+        self.console.print("=" * 60)
+
         # Print the raw content directly without Rich formatting
-        raw_content = last_assistant_message.content
-        if isinstance(raw_content, str):
-            # Use print() instead of self.console.print() to avoid Rich formatting
-            print(raw_content)
+        if isinstance(content, str):
+            print(content)
         else:
             # Handle list content (shouldn't happen with current implementation but good to be safe)
-            for item in raw_content:
+            for item in content:
                 if isinstance(item, dict) and item.get("type") == "text":
                     print(item.get("text", ""))
-        
-        self.console.print("="*60)
+
+        self.console.print("=" * 60)
         self.console.print("[dim]Tip: Select and copy the text above (excludes the === lines)[/dim]")
-        
-        return True
+
+    def is_auto_copy_enabled(self) -> bool:
+        """Check if auto-copy is enabled"""
+        return self.auto_copy_enabled
+
+    def auto_display_if_enabled(self, content):
+        """Automatically display raw content if auto-copy is enabled"""
+        if self.auto_copy_enabled:
+            self.console.print("\n[dim]─── Auto-copy mode ───[/dim]")
+            self._display_raw_content(content, 0)

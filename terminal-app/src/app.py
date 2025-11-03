@@ -118,53 +118,64 @@ class TerminalClaudeChat:
         if self.files_api_manager:
             return len(self.files_api_manager.list_files())
         return 0
-    
+
+    # In terminal-app/src/app.py
+
     def send_message_to_claude(self, message_content: Union[str, List[Dict[str, Any]]]) -> Optional[str]:
         """Send a message to Claude and get response"""
         if not self.chat_service:
             return None
-        
+
         # Add user message
         self.conversation_manager.add_user_message(message_content)
-        
+
         # Get messages for API
         api_messages = self.conversation_manager.get_api_messages()
-        
+
         # Prepare tools list
         tools = []
-        
+
         # Add web search tool if enabled
         web_tool = self.web_search_manager.get_tool_definition()
         if web_tool:
             tools.append(web_tool)
-        
+
+        # Check if auto-copy is enabled BEFORE sending
+        copy_command = self.commands.get('/copy')
+        auto_copy_enabled = copy_command and copy_command.is_auto_copy_enabled()
+
         # Send to Claude with cache manager and tools
         response_data = self.chat_service.send_message(
             api_messages,
             self.get_current_model(),
             self.get_current_model_display(),
             self.cache_manager,
-            tools
+            tools,
+            skip_formatting=auto_copy_enabled  # Pass this flag
         )
-        
+
         if response_data:
             response_text = response_data["text"]
-            
+
             # Add assistant response
             self.conversation_manager.add_assistant_message(
                 response_text,
                 self.get_current_model()
             )
-            
+
+            # If auto-copy is enabled, display raw format (formatted was skipped)
+            if auto_copy_enabled:
+                copy_command.auto_display_if_enabled(response_text)
+
             # Update conversation metadata (cache AND web search state)
             self.conversation_manager.conversation.cache_metadata = self.cache_manager.to_dict()
-            self.conversation_manager.conversation.web_search_enabled = self.web_search_manager.is_enabled()  # Add this
-            
+            self.conversation_manager.conversation.web_search_enabled = self.web_search_manager.is_enabled()
+
             # Save conversation
             self.storage.save_conversation(self.conversation_manager.conversation)
-            
+
             return response_text
-        
+
         return None
     
     def process_user_input(self) -> Optional[bool]:

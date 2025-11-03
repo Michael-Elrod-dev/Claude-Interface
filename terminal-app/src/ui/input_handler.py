@@ -32,7 +32,7 @@ class InputHandler:
         def _(event):
             """Handle Ctrl+C gracefully"""
             event.app.exit(exception=KeyboardInterrupt)
-    
+
     def get_user_input(self, prompt_text: str, cache_status: str = "", cache_color: str = "", 
                     web_status: str = "", web_color: str = "", model_display: str = "Claude") -> Optional[str]:
         """Get user input with history and completion"""
@@ -74,67 +74,67 @@ class InputHandler:
         args = command_parts[1] if len(command_parts) > 1 else None
         
         return command, args, user_input
-    
-    def build_prompt_text(self, model_display: str, file_count: int = 0, 
-                        cache_status: str = "", cache_color: str = "",
-                        web_status: str = "", web_color: str = "") -> str:
+
+    def build_prompt_text(self, model_display: str, file_count: int = 0,
+                          cache_status: str = "", cache_color: str = "",
+                          web_status: str = "", web_color: str = "") -> str:
         """Build the prompt text with status indicators"""
         status_parts = []
-        
+
         # Add model letter (S or O)
         if "Sonnet" in model_display:
             status_parts.append("S")
         elif "Opus" in model_display:
             status_parts.append("O")
-        
-        # Add web search emoji if enabled
+
+        # Add web search emoji if enabled (with space after for proper rendering)
         if web_status == "web":
-            status_parts.append("🌐")
-        
+            status_parts.append("🌐 ")  # Added space here
+
         # Add cache emoji based on status
         if cache_status == "active":
             status_parts.append("✅")
         elif cache_status == "expired":
             status_parts.append("❌")
-        
+
         # Add file count if any
         if file_count > 0:
             status_parts.append(f"📎{file_count}")
-        
-        # Join all status parts with no spaces
+
+        # Join all status parts with no spaces (except the one built into web emoji)
         if status_parts:
             status_text = "".join(status_parts)
             return f"You ({status_text}): "
         else:
             return "You: "
 
-    def _get_styled_prompt_with_status(self, model_display: str, file_count: int = 0, 
-                                    cache_status: str = "", cache_color: str = "",
-                                    web_status: str = "", web_color: str = "") -> List:
+    def _get_styled_prompt_with_status(self, model_display: str, file_count: int = 0,
+                                       cache_status: str = "", cache_color: str = "",
+                                       web_status: str = "", web_color: str = "") -> List:
         """Build formatted prompt with status indicators"""
         prompt_parts = [("", "You (")]
-        
+
         # Add model letter (bold S or O)
         if "Sonnet" in model_display:
             prompt_parts.append(("bold", "S"))
         elif "Opus" in model_display:
             prompt_parts.append(("bold", "O"))
-        
-        # Add web search emoji if enabled
+
+        # Add web search emoji if enabled (with space after for proper rendering)
         if web_status == "web":
-            prompt_parts.append(("fg:cyan", "🌐"))
-        
+            prompt_parts.append(("fg:cyan", "🌐 "))  # Added space here
+
         # Add cache emoji based on status
         if cache_status == "active":
             prompt_parts.append(("fg:green", "✅"))
         elif cache_status == "expired":
             prompt_parts.append(("fg:red", "❌"))
-        
+
         # Add file count if any
         if file_count > 0:
             prompt_parts.append(("fg:yellow", f"📎{file_count}"))
-        
+
         # Close parenthesis and add colon
         prompt_parts.append(("", "): "))
-        
+
         return prompt_parts
