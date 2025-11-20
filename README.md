@@ -71,9 +71,10 @@ A powerful command-line interface for chatting with Claude AI, featuring persist
 
 | Command | Description |
 |---------|-------------|
-| `/save [filename]` | Save current conversation |
-| `/load <filename>` | Load a conversation |
+| `/save [filename]` | Archive current conversation (with optional custom name) |
+| `/load <filename>` | Load and display a conversation from archives |
 | `/list` | List available conversations |
+| `/cull [count]` | Remove oldest messages to free up token space (default: 4 pairs) |
 | `/cleanup` | Clean up files and directories |
 
 ## Features in Detail
