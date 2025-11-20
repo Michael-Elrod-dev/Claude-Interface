@@ -51,7 +51,7 @@ Type your first message below!
 
 **Chat Commands:**
 - `/help` - Show this help message
-- `/new` - Start a new conversation
+- `/new [filename]` - Start a new conversation (optionally archive current with custom name)
 - `/clear` - Clear the screen
 - `/quit` or `/exit` - Exit the application
 - `/model [sonnet|opus]` - Switch models or show current model
@@ -79,10 +79,11 @@ Type your first message below!
 - `/files remove <file_id>` - Remove file from Files API
 - `/files use <file_id|filename>` - Include file in next message
 
-**File Commands:**
-- `/load <conversation_file>` - Load a conversation from file
-- `/save <conversation_file>` - Save conversation to file
+**Conversation Management:**
+- `/load <filename>` - Load and display a conversation from archives
+- `/save [filename]` - Archive current conversation (with optional custom name)
 - `/list` - List available conversations
+- `/cull [count]` - Remove oldest messages to free up token space (default: 4 pairs)
 
 **Features:**
 - 📎 **Files API**: Upload files once, reference them throughout the conversation
@@ -113,6 +114,8 @@ Type your first message below!
 - Use `/copy` after Claude responds with code to get clean, copyable text
 - Use `/cache` after establishing context to speed up subsequent messages
 - Use `/web on` to enable web search for current information
+- Use `/save` to create snapshots/backups while continuing your conversation
+- Use `/cull` when approaching token limits to remove oldest message pairs
 """
         self.console.print(Markdown(help_text))
     

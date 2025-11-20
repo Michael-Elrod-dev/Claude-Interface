@@ -2,7 +2,7 @@
 
 from .chat_commands import (
     NewCommand, ClearCommand, QuitCommand, ExitCommand,
-    HelpCommand, SaveCommand, LoadCommand, ListCommand
+    HelpCommand, SaveCommand, LoadCommand, ListCommand, CullCommand
 )
 from .file_commands import FilesCommand
 from .system_commands import ModelCommand, CleanupCommand, CopyCommand
@@ -19,6 +19,7 @@ COMMAND_REGISTRY = {
     '/save': SaveCommand,
     '/load': LoadCommand,
     '/list': ListCommand,
+    '/cull': CullCommand,
     '/files': FilesCommand,
     '/model': ModelCommand,
     '/cleanup': CleanupCommand,
@@ -30,7 +31,7 @@ COMMAND_REGISTRY = {
 __all__ = [
     'COMMAND_REGISTRY',
     'NewCommand', 'ClearCommand', 'QuitCommand', 'ExitCommand',
-    'HelpCommand', 'SaveCommand', 'LoadCommand', 'ListCommand',
+    'HelpCommand', 'SaveCommand', 'LoadCommand', 'ListCommand', 'CullCommand',
     'FilesCommand', 'ModelCommand', 'CleanupCommand', 'CopyCommand',
     'CacheCommand', 'WebCommand'
 ]

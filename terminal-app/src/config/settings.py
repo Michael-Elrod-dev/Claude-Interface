@@ -104,5 +104,5 @@ ENABLE_STREAMING = False
 # Commands
 AVAILABLE_COMMANDS = [
     '/help', '/new', '/load', '/save', '/clear', '/quit', '/exit',
-    '/list', '/model', '/files', '/cleanup', '/copy', '/cache', '/web'
+    '/list', '/cull', '/model', '/files', '/cleanup', '/copy', '/cache', '/web'
 ]
