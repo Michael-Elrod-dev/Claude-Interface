@@ -61,6 +61,17 @@ class ConversationManager:
     def has_messages(self) -> bool:
         """Check if conversation has any messages"""
         return len(self.conversation.messages) > 0
+
+    def remove_last_user_message(self) -> bool:
+        """Remove the last user message from conversation (used for rollback on API failure)"""
+        if not self.conversation.messages:
+            return False
+        # Find and remove the last user message
+        for i in range(len(self.conversation.messages) - 1, -1, -1):
+            if self.conversation.messages[i].role == "user":
+                self.conversation.messages.pop(i)
+                return True
+        return False
     
     def set_pending_file_reference(self, file_info: Dict[str, Any]):
         """Set a file reference to be included in the next message"""

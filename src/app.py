@@ -119,8 +119,6 @@ class TerminalClaudeChat:
             return len(self.files_api_manager.list_files())
         return 0
 
-    # In terminal-app/src/app.py
-
     def send_message_to_claude(self, message_content: Union[str, List[Dict[str, Any]]]) -> Optional[str]:
         """Send a message to Claude and get response"""
         if not self.chat_service:
@@ -153,6 +151,11 @@ class TerminalClaudeChat:
             tools,
             skip_formatting=auto_copy_enabled  # Pass this flag
         )
+
+        # If API call failed, rollback the user message we added
+        if response_data is None:
+            self.conversation_manager.remove_last_user_message()
+            return None
 
         if response_data:
             response_text = response_data["text"]

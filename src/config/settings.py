@@ -5,7 +5,7 @@ Application settings and constants.
 # Available Claude models
 AVAILABLE_MODELS = {
     'sonnet': 'claude-sonnet-4-5-20250929',
-    'opus': 'claude-opus-4-1-20250805'
+    'opus': 'claude-opus-4-5-20251101'
 }
 
 # Default model
@@ -87,7 +87,7 @@ NO_EXTENSION_TEXT_FILES = {
 
 # Storage settings
 DATA_DIR = "data"
-MAX_SAVED_CONVERSATIONS = 30
+MAX_SAVED_CONVERSATIONS = 40
 CONVERSATIONS_DIR = f"{DATA_DIR}/conversations"
 DEFAULT_CONVERSATION_FILE = f"{DATA_DIR}/conversation.json"
 HISTORY_FILE = f"{DATA_DIR}/chat_history.txt"

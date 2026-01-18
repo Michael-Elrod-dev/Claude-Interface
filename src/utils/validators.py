@@ -50,15 +50,14 @@ class Validators:
 
 class ModelUtils:
     """Model-related utility functions"""
-    
+
+    # Build reverse mapping from AVAILABLE_MODELS: model_id -> Display Name
+    _model_display_map = {model_id: key.capitalize() for key, model_id in AVAILABLE_MODELS.items()}
+
     @staticmethod
     def get_model_display_name(model_id: str) -> str:
         """Get a friendly display name for a model"""
-        model_map = {
-            'claude-sonnet-4-5-20250929': 'Sonnet',
-            'claude-opus-4-1-20250805': 'Opus'
-        }
-        return model_map.get(model_id, model_id)
+        return ModelUtils._model_display_map.get(model_id, model_id)
     
     @staticmethod
     def get_model_letter(model_id: str) -> str:

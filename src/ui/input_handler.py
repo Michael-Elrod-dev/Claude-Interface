@@ -89,7 +89,7 @@ class InputHandler:
 
         # Add web search emoji if enabled (with space after for proper rendering)
         if web_status == "web":
-            status_parts.append("🌐 ")  # Added space here
+            status_parts.append("🌐")  # Added space here
 
         # Add cache emoji based on status
         if cache_status == "active":
@@ -120,9 +120,9 @@ class InputHandler:
         elif "Opus" in model_display:
             prompt_parts.append(("bold", "O"))
 
-        # Add web search emoji if enabled (with space after for proper rendering)
+        # Add web search emoji if enabled
         if web_status == "web":
-            prompt_parts.append(("fg:cyan", "🌐 "))  # Added space here
+            prompt_parts.append(("fg:cyan", "🌐"))
 
         # Add cache emoji based on status
         if cache_status == "active":

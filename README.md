@@ -232,8 +232,9 @@ You (O🌐❌📎3): Opus + web search + expired cache + 3 files
 ## Project Structure
 
 ```
-terminal-app/
+Claude-Interface/
 ├── main.py                   # Entry point
+├── .env                      # API key configuration
 ├── src/                      # Source code
 │   ├── app.py                # Main application
 │   ├── cache/                # Cache management
@@ -250,13 +251,12 @@ terminal-app/
 │   ├── web/                  # Web search management
 │   ├── config/               # Configuration
 │   └── utils/                # Utilities
-├── data/                     # Runtime data (auto-created)
-│   ├── conversation.json     # Current conversation
-│   ├── chat_history.txt      # Command history
-│   ├── files_registry.json   # Registry of uploaded files
-│   ├── conversations/        # Archived conversations
-│   └── temp_uploads/         # Temporary uploads
-└── .env                      # API key configuration
+└── data/                     # Runtime data (auto-created)
+    ├── conversation.json     # Current conversation
+    ├── chat_history.txt      # Command history
+    ├── files_registry.json   # Registry of uploaded files
+    ├── conversations/        # Archived conversations
+    └── temp_uploads/         # Temporary uploads
 ```
 
 ## Getting Started

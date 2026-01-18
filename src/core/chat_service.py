@@ -112,6 +112,13 @@ class ChatService:
             markdown_content = Markdown(full_response)
             self.console.print(markdown_content)
 
+            # Show token usage
+            if usage_data:
+                input_tokens = usage_data.get('input_tokens', 0)
+                output_tokens = usage_data.get('output_tokens', 0)
+                percent = (input_tokens / 200000) * 100
+                self.console.print(f"[dim]Tokens: {input_tokens:,} in / {output_tokens:,} out ({percent:.1f}% of 200k context)[/dim]")
+
             # Show bottom divider
             full_divider = "─" * (self.console.size.width - 4)
             self.console.print(f"[blue]└{full_divider}─[/blue]")
@@ -153,6 +160,13 @@ class ChatService:
             # Display the formatted markdown content
             markdown_content = Markdown(full_response)
             self.console.print(markdown_content)
+
+            # Show token usage
+            if usage_data:
+                input_tokens = usage_data.get('input_tokens', 0)
+                output_tokens = usage_data.get('output_tokens', 0)
+                percent = (input_tokens / 200000) * 100
+                self.console.print(f"[dim]Tokens: {input_tokens:,} in / {output_tokens:,} out ({percent:.1f}% of 200k context)[/dim]")
 
             # Show bottom divider
             full_divider = "─" * (self.console.size.width - 4)
