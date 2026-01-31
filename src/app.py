@@ -149,7 +149,8 @@ class TerminalClaudeChat:
             self.get_current_model_display(),
             self.cache_manager,
             tools,
-            skip_formatting=auto_copy_enabled  # Pass this flag
+            skip_formatting=auto_copy_enabled,
+            message_count=len(self.conversation_manager.conversation.messages)
         )
 
         # If API call failed, rollback the user message we added

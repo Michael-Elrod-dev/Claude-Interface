@@ -2,7 +2,6 @@
 
 from typing import Optional, List, Dict, Any
 from anthropic import Anthropic
-from rich.console import Console
 from rich.markdown import Markdown
 
 from ..config import MAX_TOKENS, ANTHROPIC_CACHE_HEADERS, ENABLE_STREAMING
@@ -22,7 +21,7 @@ class ChatService:
 
     def send_message(self, messages: List[Dict[str, Any]], model: str,
                      model_display_name: str, cache_manager=None, tools: List[Dict[str, Any]] = None,
-                     skip_formatting: bool = False) -> Optional[Dict[str, Any]]:
+                     skip_formatting: bool = False, message_count: int = 0) -> Optional[Dict[str, Any]]:
         """Send messages to Claude API with optional streaming response"""
 
         try:
@@ -42,15 +41,15 @@ class ChatService:
                 message_params["tools"] = tools
 
             if ENABLE_STREAMING:
-                return self._send_streaming(message_params, model_display_name, cache_manager, skip_formatting)
+                return self._send_streaming(message_params, model_display_name, cache_manager, skip_formatting, message_count)
             else:
-                return self._send_non_streaming(message_params, model_display_name, cache_manager, skip_formatting)
+                return self._send_non_streaming(message_params, model_display_name, cache_manager, skip_formatting, message_count)
 
         except Exception as e:
             self.console.print(f"[red]Error: {e}[/red]")
             return None
 
-    def _send_streaming(self, message_params, model_display_name, cache_manager, skip_formatting=False):
+    def _send_streaming(self, message_params, model_display_name, cache_manager, skip_formatting=False, message_count=0):
         """Handle streaming response"""
         # Only show formatted output if not skipping
         if not skip_formatting:
@@ -112,12 +111,10 @@ class ChatService:
             markdown_content = Markdown(full_response)
             self.console.print(markdown_content)
 
-            # Show token usage
+            # Show context info
             if usage_data:
-                input_tokens = usage_data.get('input_tokens', 0)
-                output_tokens = usage_data.get('output_tokens', 0)
-                percent = (input_tokens / 200000) * 100
-                self.console.print(f"[dim]Tokens: {input_tokens:,} in / {output_tokens:,} out ({percent:.1f}% of 200k context)[/dim]")
+                percent = (usage_data.get('input_tokens', 0) / 200000) * 100
+                self.console.print(f"[dim]Context: {percent:.1f}% | Messages: {message_count}[/dim]")
 
             # Show bottom divider
             full_divider = "─" * (self.console.size.width - 4)
@@ -136,7 +133,7 @@ class ChatService:
 
         return result
 
-    def _send_non_streaming(self, message_params, model_display_name, cache_manager, skip_formatting=False):
+    def _send_non_streaming(self, message_params, model_display_name, cache_manager, skip_formatting=False, message_count=0):
         """Handle non-streaming response with progress indicator"""
         from ..ui.progress import ProgressIndicator
 
@@ -161,12 +158,10 @@ class ChatService:
             markdown_content = Markdown(full_response)
             self.console.print(markdown_content)
 
-            # Show token usage
+            # Show context info
             if usage_data:
-                input_tokens = usage_data.get('input_tokens', 0)
-                output_tokens = usage_data.get('output_tokens', 0)
-                percent = (input_tokens / 200000) * 100
-                self.console.print(f"[dim]Tokens: {input_tokens:,} in / {output_tokens:,} out ({percent:.1f}% of 200k context)[/dim]")
+                percent = (usage_data.get('input_tokens', 0) / 200000) * 100
+                self.console.print(f"[dim]Context: {percent:.1f}% | Messages: {message_count}[/dim]")
 
             # Show bottom divider
             full_divider = "─" * (self.console.size.width - 4)
@@ -184,7 +179,7 @@ class ChatService:
             cache_manager.update_from_response(result)
 
         return result
-    
+
     def _extract_text_from_response(self, response) -> str:
         """Extract text content from Anthropic API response (for non-streaming)"""
         text_parts = []
