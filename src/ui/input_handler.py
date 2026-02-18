@@ -22,9 +22,26 @@ class InputHandler:
         data_dir = Path(DATA_DIR)
         data_dir.mkdir(exist_ok=True)
         self.history_file = Path(HISTORY_FILE)
+        self._trim_history(max_entries=2000)
+        self.history = FileHistory(str(self.history_file))
         self.bindings = KeyBindings()
         self._setup_key_bindings()
         self.completer = WordCompleter(AVAILABLE_COMMANDS)
+
+    def _trim_history(self, max_entries: int):
+        """Trim history file to at most max_entries entries."""
+        if not self.history_file.exists():
+            return
+
+        content = self.history_file.read_text(encoding='utf-8', errors='replace')
+        blocks = content.split('\n\n')
+        entries = [b for b in blocks if b.strip().startswith('#')]
+
+        if len(entries) <= max_entries:
+            return
+
+        kept = entries[-max_entries:]
+        self.history_file.write_text('\n\n'.join(kept) + '\n', encoding='utf-8')
     
     def _setup_key_bindings(self):
         """Set up custom key bindings"""
@@ -49,7 +66,7 @@ class InputHandler:
             
             user_input = prompt(
                 styled_prompt,
-                history=FileHistory(str(self.history_file)),
+                history=self.history,
                 auto_suggest=AutoSuggestFromHistory(),
                 completer=self.completer,
                 key_bindings=self.bindings,
