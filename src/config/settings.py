@@ -5,7 +5,7 @@ Application settings and constants.
 # Available Claude models
 AVAILABLE_MODELS = {
     'sonnet': 'claude-sonnet-4-6',
-    'opus': 'claude-opus-4-6'
+    'opus': 'claude-opus-4-7'
 }
 
 # Default model

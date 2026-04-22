@@ -197,6 +197,14 @@ class LoadCommand(BaseCommand):
         conversation = self.app_context.storage.load_from_conversations_dir(args)
 
         if conversation:
+            # Auto-archive the current conversation before loading if it has messages
+            if self.app_context.conversation_manager.has_messages():
+                archived_name = self.app_context.storage.archive_conversation(
+                    self.app_context.conversation_manager.conversation
+                )
+                if archived_name:
+                    self.console.print(f"[dim]Current conversation auto-saved as: {archived_name}[/dim]")
+
             # Clear the screen (same implementation as /clear command)
             os.system('clear' if os.name == 'posix' else 'cls')
 

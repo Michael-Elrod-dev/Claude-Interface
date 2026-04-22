@@ -150,7 +150,7 @@ class TerminalClaudeChat:
             self.cache_manager,
             tools,
             skip_formatting=auto_copy_enabled,
-            message_count=len(self.conversation_manager.conversation.messages)
+            message_count=len(self.conversation_manager.conversation.messages) + 1
         )
 
         # If API call failed, rollback the user message we added
